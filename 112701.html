@@ -331,6 +331,112 @@ async function refreshSheet(depth="Surface"){
   }catch(e){ console.warn("CSV 錯誤：",e); }
 }
 
+/* ============================================
+   🌟 瑞成智慧茶園 AI 通知系統 v1.0
+   ============================================ */
+
+// 防止同一條通知一直跳
+let notified = {
+  moisture: {},
+  npk: {},
+  temp: {},
+  weather: false,
+  offline: false
+};
+
+// 觸發通知用
+function alertTea(title, msg) {
+  sendNotification(title, msg);
+  console.log("[通知] ", title, msg);
+}
+
+/* ============================================
+   📌 1. 土壤含水率異常
+   ============================================ */
+function checkMoisture(station, value) {
+  if (value < 20 && !notified.moisture[station]) {
+    alertTea(
+      "土壤含水率偏低",
+      `第 ${station} 站含水率僅 ${value}% ，可能偏乾燥`
+    );
+    notified.moisture[station] = true;
+  }
+}
+
+/* ============================================
+   📌 2. NPK 異常（0 or <20）
+   ============================================ */
+function checkNPK(station, n, p, k) {
+  if (n === 0 && !notified.npk[station + "_n"]) {
+    alertTea("N 氮值異常", `第 ${station} 站 氮(N)=0，請檢查感測器`);
+    notified.npk[station + "_n"] = true;
+  }
+  if (p === 0 && !notified.npk[station + "_p"]) {
+    alertTea("P 磷值異常", `第 ${station} 站 磷(P)=0，請檢查感測器`);
+    notified.npk[station + "_p"] = true;
+  }
+  if (k === 0 && !notified.npk[station + "_k"]) {
+    alertTea("K 鉀值異常", `第 ${station} 站 鉀(K)=0，請檢查感測器`);
+    notified.npk[station + "_k"] = true;
+  }
+}
+
+/* ============================================
+   📌 3. 土壤溫度異常
+   ============================================ */
+function checkSoilTemp(station, value) {
+  if (value > 35 && !notified.temp[station]) {
+    alertTea("土壤溫度過高", `第 ${station} 站土壤溫度 ${value}°C`);
+    notified.temp[station] = true;
+  }
+  if (value < 10 && !notified.temp[station + "_low"]) {
+    alertTea("土壤過冷", `第 ${station} 站土壤僅 ${value}°C`);
+    notified.temp[station + "_low"] = true;
+  }
+}
+
+/* ============================================
+   📌 4. 天氣開始下雨（一次性通知）
+   ============================================ */
+function checkRain(value) {
+  if (value > 0 && !notified.weather) {
+    alertTea("🌧 開始下雨", `名間鄉降雨量：${value} mm`);
+    notified.weather = true;
+  }
+}
+
+/* ============================================
+   📌 5. 感測器可能掉線
+   ============================================ */
+let lastUpdateTime = Date.now();
+
+function checkOffline() {
+  if (!notified.offline &&
+      Date.now() - lastUpdateTime > 30 * 1000) {
+
+    alertTea("⚠ 感測器掉線", "30 秒未收到資料更新");
+    notified.offline = true;
+  }
+}
+
+// 每 10 秒偵測是否掉線
+setInterval(checkOffline, 10000);
+
+/* ============================================
+   👇 整合到 refreshSheet()（你需加入這裡）
+   ============================================ */
+
+// 請在 refreshSheet() 裡每站資料處理後加入：
+
+// checkMoisture(stationNum, soilMoist);
+// checkNPK(stationNum, nitrogen, phosphorus, potassium);
+// checkSoilTemp(stationNum, soilTemp);
+
+
+
+
+
+    
 
 /* ================================ */
 /*             天氣 API            */
@@ -411,4 +517,5 @@ refreshWeather();
 
 
 </body>
+
 </html>  
