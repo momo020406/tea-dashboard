@@ -450,21 +450,41 @@ function checkRain(value) {
 }
 
 /* ============================================
-   📌 5. 感測器可能掉線
+   📌 5. 感測器可能掉線（Offline Detection）
+   --------------------------------------------
+   🔧 主要參數（可自由調整）
+   - OFFLINE_LIMIT = 10 * 60 * 1000   → 10分鐘（毫秒）
+   - CHECK_INTERVAL = 10 * 1000       → 每 10 秒檢查一次
    ============================================ */
-let lastUpdateTime = Date.now();
+
+// ❗ 每筆資料更新時，refreshSheet() 會更新此時間
+let lastUpdateTime = Date.now(); 
+
+// 🔧【設定掉線判斷時間】
+// 10 分鐘 = 10 * 60 * 1000 毫秒
+const OFFLINE_LIMIT = 10 * 60 * 1000;   // ← 你可以改這裡（毫秒）
+
+// 🔧【設定多久檢查一次】
+// 目前：10 秒檢查一次
+const CHECK_INTERVAL = 10 * 1000;       // ← 你可以改這裡（毫秒）
 
 function checkOffline() {
+  // 如果尚未通知過，且距離上次資料更新時間已超過設定秒數
   if (!notified.offline &&
-      Date.now() - lastUpdateTime > 30 * 1000) {
+      Date.now() - lastUpdateTime > OFFLINE_LIMIT) {
 
-    alertTea("⚠ 感測器掉線", "30 秒未收到資料更新");
+    alertTea(
+      "⚠ 感測器掉線",
+      `超過 ${(OFFLINE_LIMIT / 60000).toFixed(1)} 分鐘未收到資料更新`
+    );
+
     notified.offline = true;
   }
 }
 
-// 每 10 秒偵測是否掉線
-setInterval(checkOffline, 10000);
+// ⏱ 每 CHECK_INTERVAL 毫秒檢查一次
+setInterval(checkOffline, CHECK_INTERVAL);
+
 
 /* ============================================
    👇 整合到 refreshSheet()（你需加入這裡）
