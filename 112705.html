@@ -378,10 +378,10 @@ function checkOffline() {
   if (!notified.offline &&
       Date.now() - lastUpdateTime > 30 * 1000) {
 
-    // 本地彈窗
+    // 本地通知（瀏覽器）
     alertTea("⚠ 感測器掉線", "30 秒未收到資料更新");
 
-    // 📌 正式推播到 GAS（Messaging API）
+    // 📌 正式推播到你的最新 GAS（Messaging API）
     fetch("https://script.google.com/macros/s/AKfycbwN1KxcZiVb7qJxciLskIzDSB06-Z1KJNGo4BsNJh3wgqd9xAoYF-_1lm0W4RgNPeYPRw/exec", {
       method: "POST",
       headers: { 
@@ -389,7 +389,7 @@ function checkOffline() {
       },
       body: JSON.stringify({
         title: "⚠ 感測器掉線警報",
-        message: "第 1 站：超過 30 秒未收到資料更新"
+        message: "⚠ 30 秒未收到任何資料更新（可能掉線）"
       })
     })
     .then(r => r.json())
@@ -399,6 +399,7 @@ function checkOffline() {
     notified.offline = true;
   }
 }
+
 
 // 每 10 秒偵測一次
 setInterval(checkOffline, 10000);
