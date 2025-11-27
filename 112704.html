@@ -209,55 +209,7 @@ async function sendNotification(title, body) {
   });
 }
 
-<script type="module">
-  // Firebase SDK
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-  import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-messaging.js";
 
-  // 你自己的 Firebase Config
-  const firebaseConfig = {
-    apiKey: "AIzaSyBBZ3kaJdRJA26htneGlCxQWJHcGH6IDMQ",
-    authDomain: "tea1234-82e1f.firebaseapp.com",
-    projectId: "tea1234-82e1f",
-    storageBucket: "tea1234-82e1f.firebasestorage.app",
-    messagingSenderId: "444630451366",
-    appId: "1:444630451366:web:595ec7e595a40a4528e067",
-    measurementId: "G-CG5PBK0SW9"
-  };
-
-  // 初始化
-  const app = initializeApp(firebaseConfig);
-  const messaging = getMessaging(app);
-
-  // 申請推播權限
-  async function requestPermission() {
-    console.log("📌 正在要求使用者允許推播...");
-
-    const permission = await Notification.requestPermission();
-
-    if (permission === "granted") {
-      console.log("🎉 推播權限允許！取得 Token...");
-
-      const token = await getToken(messaging, {
-        vapidKey: "BKnr1k9-CsNWZEAS0oTxiyrRHFbUPAXPAzg1rmLPiWnlxHokaJzrxndFrtkGvNemPnXfi_WlasvY5XJCmvK1Rw8"
-      });
-
-      console.log("📬 FCM Token：", token);
-      alert("你的 FCM Token：\n" + token);
-    } else {
-      console.log("❌ 推播被拒絕");
-    }
-  }
-
-  // 呼叫
-  requestPermission();
-
-  // 前景訊息接收
-  onMessage(messaging, (payload) => {
-    console.log("📩 前景訊息：", payload);
-    alert("前景收到推播： " + payload.notification.title);
-  });
-</script>
 
 
 
