@@ -173,7 +173,7 @@ tbody tr td:first-child{font-weight:800;color:#1f2937}
    設定區
 -------------------------------- */
 const GAS_PUSH_URL = "https://script.google.com/macros/s/AKfycbwN1KxcZiVb7qJxciLskIzDSB06-Z1KJNGo4BsNJh3wgqd9xAoYF-_1lm0W4RgNPeYPRw/exec";
-
+                      
 const CONFIG = {
   sheetCsvUrl:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTS7HeQa-EF65JqRoZufcn3U6msKU7NSr0QqPezgqcuCHousSsK8z_IBHkdGvLNU0XZTcreLfnBwL0M/pub?output=csv",
   cwaAuth:"CWA-4A8A0D9D-95EA-4DA0-A62C-2DC7A8909F06",
@@ -215,23 +215,10 @@ function alertTea(title,msg){
 
 /* 按鈕：手動通知 */
 /* 按鈕：手動通知 */
+/* 按鈕：手動通知 */
 document.getElementById("btnNotify").onclick = () => {
-
-  // 1️⃣ 瀏覽器通知
-  alertTea("瑞成智慧茶園通知", "這是一則測試通知（LINE + 瀏覽器）");
-
-  // 2️⃣ LINE 推播（Messaging API GAS）
-  fetch("https://script.google.com/macros/s/AKfycbwN1KxcZiVb7qJxciLskIzDSB06-Z1KJNGo4BsNJh3wgqd9xAoYF-_1lm0W4RgNPeYPRw/exec", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      title: "🔔 測試：Messaging API 已成功連線",
-      message: "這是一則按鈕觸發的測試訊息！（來自 HTML 頁面）"
-    })
-  })
-  .then(r => r.text())
-  .then(res => console.log("LINE 推播回應：", res))
-  .catch(err => console.error("LINE 推播失敗：", err));
+  // alertTea 會同時觸發瀏覽器通知 (browserNotify) 和 LINE 推播 (pushLine)
+  alertTea("瑞成智慧茶園通知", "這是一則測試通知（LINE + 瀏覽器）");
 };
 
 
