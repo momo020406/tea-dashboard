@@ -109,20 +109,18 @@ tbody tr td:first-child{font-weight:800;color:#1f2937}
   }
   .btn{width:120px;font-size:18px;}
 }
-/* 電腦版：兩個都靠左，同一行 */
+/* ===== 電腦版：全部靠左、同一行 ===== */
 .weather-title {
   display: flex;
   align-items: center;
-  gap: 6px;          /* 兩者之間留一點距離，避免黏住 */
+  gap: 8px;     /* ← 讓兩者不要貼太近 */
   font-size: 28px;
 }
 
-/* 左邊標題 */
 .wt-left {
   font-weight: 700;
 }
 
-/* 右邊來源（但電腦版仍然靠左） */
 .wt-right {
   font-size: 60%;
   color: #444;
