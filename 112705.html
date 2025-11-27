@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>瑞成智慧茶園 - 即時儀表板 v7.0</title>
+<title>瑞成智慧茶園 - 即時儀表板 v7.2</title>
 
 <style>
 :root{
@@ -39,12 +39,7 @@ header{
   justify-content:center;flex-direction:column;font-weight:700;}
 .clock{font-size:46px;}
 .datebox{font-size:36px;font-weight:800;}
-.source-note {
-  font-size: 50%; 
-  color: #444;
-  font-weight: 500;
-  margin-left: 4px;
-}
+.source-note {font-size:50%;color:#444;margin-left:4px;}
 
 /* 上方兩個面板 */
 .top-panels{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);margin-top:var(--gap);}
@@ -53,13 +48,13 @@ header{
 
 /* 天氣 */
 .weather-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;background:var(--tile);
-  border-radius:14px;padding:12px;align-items:start;justify-items:start;}
-.weather-cell{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700;line-height:1.4}
-.weather-cell img{width:36px;height:36px;}
+  border-radius:14px;padding:12px;}
+.weather-cell{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700}
+.weather-cell img{width:36px;height:36px}
 
 /* 環境感測 */
 .env-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:var(--tile);
-  border-radius:14px;padding:12px;align-items:center;justify-items:center;}
+  border-radius:14px;padding:12px;}
 .env-cell{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700;color:var(--num);}
 .env-cell img{width:50px;height:50px;}
 .env-cell .value{font-size:36px;font-weight:800}
@@ -73,23 +68,16 @@ header{
 /* 統一按鈕 */
 .btn{
   background:var(--panel);
-  color:#fff;
-  border:none;
-  border-radius:999px;
-  padding:10px 0;
-  width:130px;
-  font-size:20px;
-  font-weight:800;
-  cursor:pointer;
-  letter-spacing:1px;
-  text-align:center;
+  color:#fff;border:none;border-radius:999px;
+  padding:10px 0;width:130px;font-size:20px;font-weight:800;
+  cursor:pointer;letter-spacing:1px;text-align:center;
 }
 .btn:active{transform:translateY(1px);}
 .depth-btn.active{background:var(--ok);}
 
-table{width:100%;border-collapse:separate;border-spacing:0 10px}
+/* 表格 */
+table{width:100%;border-collapse:separate;border-spacing:0 10px;}
 thead th{font-size:18px;color:#334155;text-align:center}
-tbody td,thead th{padding:10px 8px}
 tbody tr{background:var(--tile);}
 tbody tr td{font-size:22px;text-align:center;font-weight:700;color:var(--num)}
 tbody tr td:first-child{font-weight:800;color:#1f2937}
@@ -108,20 +96,18 @@ tbody tr td:first-child{font-weight:800;color:#1f2937}
   .env-grid{grid-template-columns:1fr;}
   tbody tr td{font-size:18px}
   .table-title {flex-direction:column;align-items:center;gap:12px;}
-  .depth-buttons {
-    display:grid;grid-template-columns:repeat(2,1fr);
-    gap:10px 14px;justify-items:center;
-  }
+  .depth-buttons {display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
   .btn{width:120px;font-size:18px;}
 }
 
-/* ===== 數據顏色系統 ===== */
+/* 顏色系統 */
 .val-ok { color:#0f9d58 !important; font-weight:900; }
 .val-warn { color:#f4b400 !important; font-weight:900; }
-.val-bad { color:#db4437 !important; font-weight:900; }
+.val-bad { color:#d93025 !important; font-weight:900; }
 .val-high { color:#c71585 !important; font-weight:900; }
 </style>
 </head>
+
 <body>
 <div class="wrap">
   <header>
@@ -130,23 +116,19 @@ tbody tr td:first-child{font-weight:800;color:#1f2937}
     <div class="clock"><div id="mainClock">00:00:00</div></div>
   </header>
 
-  <!-- ============================= -->
-  <!--          天氣面板            -->
-  <!-- ============================= -->
+  <!-- 天氣 -->
   <div class="top-panels">
     <section class="panel">
-      <h2 class="weather-title">
-        南投 名間鄉天氣狀況
-        <small class="source-note">（資料來源：氣象署）</small>
-      </h2>
+      <h2>南投 名間鄉天氣狀況 <small class="source-note">（資料來源：氣象署）</small></h2>
       <div class="weather-grid">
-        <div class="weather-cell"><img id="weatherIcon" src=""><span>天氣：<span id="weatherDesc">—</span></span></div>
-        <div class="weather-cell"><img src="https://img.icons8.com/emoji/48/thermometer-emoji.png"><span>氣溫：<span id="weatherTemp">—</span> °C</span></div>
-        <div class="weather-cell"><img src="https://img.icons8.com/color/48/humidity.png"><span>濕度：<span id="weatherHumi">—</span> %</span></div>
-        <div class="weather-cell"><img src="https://img.icons8.com/emoji/48/umbrella-with-rain-drops.png"><span>降雨量：<span id="rainfall">—</span> mm</span></div>
+        <div class="weather-cell"><img id="weatherIcon"><span>天氣：<span id="weatherDesc">—</span></span></div>
+        <div class="weather-cell"><img src="https://img.icons8.com/emoji/48/thermometer-emoji.png">氣溫：<span id="weatherTemp">—</span>°C</div>
+        <div class="weather-cell"><img src="https://img.icons8.com/color/48/humidity.png">濕度：<span id="weatherHumi">—</span>%</div>
+        <div class="weather-cell"><img src="https://img.icons8.com/emoji/48/umbrella-with-rain-drops.png">降雨：<span id="rainfall">—</span> mm</div>
       </div>
     </section>
 
+    <!-- 茶園環境 -->
     <section class="panel">
       <h2>茶園溫溼度感測器</h2>
       <div class="env-grid">
@@ -162,39 +144,36 @@ tbody tr td:first-child{font-weight:800;color:#1f2937}
     </section>
   </div>
 
-  <!-- ============================= -->
-  <!--     土壤資料 + 顏色變化      -->
-  <!-- ============================= -->
+  <!-- 土壤資料 -->
   <div class="table-wrap">
     <div class="table-title">
       <h3>各站土壤數據</h3>
-      <div class="depth-buttons"> 
+      <div class="depth-buttons">
         <button class="btn depth-btn active" data-depth="Surface">表面層</button>
-        <button class="btn depth-btn" data-depth="15cm">15 cm 層</button>
-        <button class="btn depth-btn" data-depth="25cm">25 cm 層</button>
+        <button class="btn depth-btn" data-depth="15cm">15cm 層</button>
+        <button class="btn depth-btn" data-depth="25cm">25cm 層</button>
         <button class="btn" id="btnFullscreen">全螢幕</button>
-        <!-- 🔔 通知測試 -->
         <button class="btn" id="btnNotify">🔔 通知測試</button>
       </div>
     </div>
 
     <table>
-      <thead>
-        <tr><th>項目</th><th>溫度 (°C)</th><th>含水率 (%)</th><th>氮 (N)</th><th>磷 (P)</th><th>鉀 (K)</th></tr>
-      </thead>
+      <thead><tr><th>項目</th><th>溫度</th><th>含水率</th><th>N</th><th>P</th><th>K</th></tr></thead>
       <tbody id="tbody"></tbody>
     </table>
 
     <div class="footer-line" id="footerInfo">
-      氣象站更新時間：—　｜　感測器讀取時間：—　｜　🔄 下次更新倒數：—
+      氣象站：— ｜ 感測器：— ｜ 🔄 倒數：—
     </div>
   </div>
 </div>
 
 <script>
-/* ================================
-   基本工具 & 設定
-================================ */
+/* ------------------------------
+   設定區
+-------------------------------- */
+const GAS_PUSH_URL = "https://script.google.com/macros/s/AKfycbwN1KxcZiVb7qJxciLskIzDSB06-Z1KJNGo4BsNJh3wgqd9xAoYF-_1lm0W4RgNPeYPRw/exec";
+
 const CONFIG = {
   sheetCsvUrl:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTS7HeQa-EF65JqRoZufcn3U6msKU7NSr0QqPezgqcuCHousSsK8z_IBHkdGvLNU0XZTcreLfnBwL0M/pub?output=csv",
   cwaAuth:"CWA-4A8A0D9D-95EA-4DA0-A62C-2DC7A8909F06",
@@ -204,329 +183,216 @@ const CONFIG = {
 };
 
 function pad(n){return n<10?'0'+n:n}
-function nowStr(){const d=new Date();return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}` }
-function dateStr(){const d=new Date();const w=['日','一','二','三','四','五','六'][d.getDay()];return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}（週${w}）` }
+function nowStr(){const d=new Date();return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`}
+function dateStr(){const d=new Date();const w=['日','一','二','三','四','五','六'][d.getDay()];return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}（週${w}）`}
 function roundInt(x){if(x==null||x==='')return'—';const n=Number(x);return isFinite(n)?Math.round(n):String(x);}
 
-/* ================================
-   🔔 LINE Notify + 網頁通知
-================================ */
-// 呼叫你的 GAS Web App 來推 LINE
-async function sendLine(title, body){
+/* ------------------------------
+   通知（瀏覽器 + LINE）
+-------------------------------- */
+async function pushLine(title, message){
   try{
-    await fetch("https://script.google.com/macros/s/AKfycbwN1KxcZiVb7qJxciLskIzDSB06-Z1KJNGo4BsNJh3wgqd9xAoYF-_1lm0W4RgNPeYPRw/exec",{
+    await fetch(GAS_PUSH_URL,{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ title, message: body })
+      body: JSON.stringify({ title, message })
     });
-  }catch(e){
-    console.warn("LINE Messaging API 發送失敗：", e);
+  }catch(e){ console.error("LINE 推播失敗：",e); }
+}
+
+async function browserNotify(title, body){
+  if(Notification.permission!=="granted"){
+    let p=await Notification.requestPermission();
+    if(p!=="granted"){ alert("請允許通知權限");return; }
   }
+  new Notification(title,{ body, icon:"https://img.icons8.com/color/96/tea.png" });
 }
 
-// 網頁桌面通知
-async function sendNotification(title, body) {
-  if (Notification.permission !== "granted") {
-    const permission = await Notification.requestPermission();
-    if (permission !== "granted") {
-      alert("您尚未開啟通知權限（瀏覽器）");
-      return;
-    }
-  }
-  new Notification(title, {
-    body: body,
-    icon: "https://img.icons8.com/color/96/tea.png"
-  });
+function alertTea(title,msg){
+  browserNotify(title,msg);
+  pushLine(title,msg);
 }
 
-// 統一通知入口：同時發 LINE + 瀏覽器通知
-function alertTea(title, msg) {
-  sendNotification(title, msg);
-  sendLine(title, msg);
-  console.log("[通知] ", title, msg);
-}
+/* 按鈕：手動通知 */
+document.getElementById("btnNotify").onclick=()=>{
+  alertTea("瑞成智慧茶園通知","這是一則測試通知（LINE + 瀏覽器）");
+};
 
-// 按鈕：通知測試
-document.getElementById("btnNotify").addEventListener("click", () => {
-  alertTea("瑞成智慧茶園通知", "這是一則測試通知（LINE + 網頁）");
-});
-
-/* ================================
-   數值 → 顏色判斷
-================================ */
+/* ------------------------------
+   欄位顏色
+-------------------------------- */
 function colorClass(type, value){
-  if(value === "—" || value === "" || value == null) return "";
-  value = Number(value);
+  if(value=="—") return "";
+  value=Number(value);
 
-  switch(type){
-    case "temp":
-      if(value < 10) return "val-warn";
-      if(value < 28) return "val-ok";
-      if(value < 35) return "val-warn";
-      return "val-bad";
-
-    case "moist":
-      if(value < 20) return "val-bad";
-      if(value < 35) return "val-warn";
-      if(value < 70) return "val-ok";
-      return "val-warn";
-
-    case "n":
-    case "p":
-    case "k":
-      if(value === 0) return "val-bad";
-      if(value < 20) return "val-warn";
-      return "val-ok";
-
-    default: return "";
+  if(type=="temp"){
+    if(value<10) return"val-warn";
+    if(value<28) return"val-ok";
+    if(value<35) return"val-warn";
+    return"val-bad";
   }
+  if(type=="moist"){
+    if(value<20) return"val-bad";
+    if(value<35) return"val-warn";
+    if(value<70) return"val-ok";
+    return"val-warn";
+  }
+  if(type=="n"||type=="p"||type=="k"){
+    if(value==0) return"val-bad";
+    if(value<20) return"val-warn";
+    return"val-ok";
+  }
+  return"";
 }
 
-/* ================================
-   CSV 讀取邏輯（來源 A）
-   ★ 重點：把欄位名稱轉成小寫，才能配對 station1_surface_soiltemp 這種 key
-================================ */
+/* ------------------------------
+   讀 CSV
+-------------------------------- */
 async function fetchCSV(){
-  const res=await fetch(CONFIG.sheetCsvUrl+"&t="+Date.now(),{cache:'no-store'});
+  const res=await fetch(CONFIG.sheetCsvUrl+"&t="+Date.now());
   const text=await res.text();
-  const lines=text.trim().split(/\r?\n/).map(l=>l.split(',').map(v=>v.replace(/^"|"$/g,'').trim()));
-  // ★ 欄位名稱轉小寫，跟我們下面的 idx["station1_surface_soiltemp"] 對得起來
-  const cols=lines[0].map(c=>c.replace(/^\uFEFF/,'').trim().toLowerCase());
-  const rows=lines.slice(1);
-  return {cols,rows};
+  const lines=text.trim().split(/\r?\n/).map(r=>r.split(',').map(v=>v.replace(/^"|"$/g,'').trim()));
+  const cols=lines[0].map(c=>c.toLowerCase());
+  return { cols, rows:lines.slice(1) };
 }
 
 function getLastValid(rows){
-  for(let i=rows.length-1;i>=0;i--) if(rows[i].some(v=>v!=="")) return rows[i];
+  for(let i=rows.length-1;i>=0;i--) if(rows[i].some(v=>v!="")) return rows[i];
   return null;
 }
 
-/* ================================
-   AI 告警狀態
-================================ */
-let weatherTime="—", genTime="—";
-let remainingSec = CONFIG.autoRefreshMinutes*60;
-const footer=document.getElementById("footerInfo");
+/* ------------------------------
+   告警系統
+-------------------------------- */
+let lastUpdateTime=Date.now();
+let notified={ moisture:{}, npk:{}, temp:{}, weather:false, offline:false };
+let genTime="—", weatherTime="—";
 
-let lastUpdateTime = Date.now();
-let notified = {
-  moisture: {},
-  npk: {},
-  temp: {},
-  weather: false,
-  offline: false
-};
-
-function updateFooter(){
-  const m=Math.floor(remainingSec/60), s=pad(remainingSec%60);
-  footer.textContent = `氣象站更新時間：${weatherTime}　｜　感測器讀取時間：${genTime}　｜　🔄 下次更新倒數：${m}:${s}`;
-}
-
-/* 📌 1. 土壤含水率異常 */
-function checkMoisture(station, value) {
-  if (value === "—") return;
-  const v = Number(value);
-  if (v < 20 && !notified.moisture[station]) {
-    alertTea("土壤含水率偏低", `第 ${station} 站含水率僅 ${v}% ，可能偏乾燥`);
-    notified.moisture[station] = true;
+function checkOffline(){
+  if(!notified.offline && Date.now()-lastUpdateTime>30000){
+    alertTea("⚠ 感測器可能掉線","30 秒未收到資料更新");
+    notified.offline=true;
   }
 }
+setInterval(checkOffline,10000);
 
-/* 📌 2. NPK 異常（0） */
-function checkNPK(station, n, p, k) {
-  const nn = Number(n), pp = Number(p), kk = Number(k);
-  if (nn === 0 && !notified.npk[station + "_n"]) {
-    alertTea("N 氮值異常", `第 ${station} 站 氮 (N)=0，請檢查感測器`);
-    notified.npk[station + "_n"] = true;
-  }
-  if (pp === 0 && !notified.npk[station + "_p"]) {
-    alertTea("P 磷值異常", `第 ${station} 站 磷 (P)=0，請檢查感測器`);
-    notified.npk[station + "_p"] = true;
-  }
-  if (kk === 0 && !notified.npk[station + "_k"]) {
-    alertTea("K 鉀值異常", `第 ${station} 站 鉀 (K)=0，請檢查感測器`);
-    notified.npk[station + "_k"] = true;
-  }
-}
-
-/* 📌 3. 土壤溫度異常 */
-function checkSoilTemp(station, value) {
-  if (value === "—") return;
-  const v = Number(value);
-  if (v > 35 && !notified.temp[station]) {
-    alertTea("土壤溫度過高", `第 ${station} 站土壤溫度 ${v}°C`);
-    notified.temp[station] = true;
-  }
-  if (v < 10 && !notified.temp[station + "_low"]) {
-    alertTea("土壤過冷", `第 ${station} 站土壤僅 ${v}°C`);
-    notified.temp[station + "_low"] = true;
-  }
-}
-
-/* 📌 4. 天氣開始下雨（一次性通知） */
-function checkRain(value) {
-  if (value === "—") return;
-  const v = Number(value);
-  if (v > 0 && !notified.weather) {
-    alertTea("🌧 開始下雨", `名間鄉降雨量：${v} mm`);
-    notified.weather = true;
-  }
-}
-
-/* 📌 5. 感測器可能掉線（30 秒沒更新） */
-function checkOffline() {
-  if (!notified.offline &&
-      Date.now() - lastUpdateTime > 30 * 1000) {
-
-    // 本地通知（瀏覽器）
-    alertTea("⚠ 感測器掉線", "30 秒未收到資料更新");
-
-    // 📌 正式推播到你的最新 GAS（Messaging API）
-fetch("https://script.google.com/macros/s/AKfycbwN1KxcZiVb7qJxciLskIzDSB06-Z1KJNGo4BsNJh3wgqd9xAoYF-_1lm0W4RgNPeYPRw/exec", {
-  method: "POST",
-  headers: { "Content-Type": "application/json"},
-  body: JSON.stringify({
-    title: "⚠ 感測器掉線警報",
-    message: "⚠ 30 秒未收到任何資料更新（可能掉線）"
-  })
-})
-    .then(r => r.json())
-    .then(res => console.log("LINE 推播成功：", res))
-    .catch(err => console.error("LINE 推播失敗：", err));
-
-    notified.offline = true;
-  }
-}
-
-
-// 每 10 秒偵測一次
-setInterval(checkOffline, 10000);
-
-/* ================================
-   更新表格（重點：欄位 mapping 正確）
-================================ */
+/* ------------------------------
+   更新表格
+-------------------------------- */
 async function refreshSheet(depth="Surface"){
   try{
-    const {cols, rows} = await fetchCSV();
-    const last = getLastValid(rows);
+    const {cols, rows}=await fetchCSV();
+    const last=getLastValid(rows);
     if(!last) return;
 
-    // 建立欄位索引（已全部轉小寫）
+    lastUpdateTime=Date.now();
+
     const idx={}; cols.forEach((c,i)=>idx[c]=i);
 
-    // 取得時間欄
-    const timeIdx = cols.findIndex(c=>c.includes("time"));
-    genTime = timeIdx>=0 ? last[timeIdx] : "—";
-    lastUpdateTime = Date.now();
-    updateFooter();
+    genTime=last[idx["time"]] || "—";
 
-    // 讀茶園空氣溫溼度
-    document.getElementById("envTemp").textContent = roundInt(last[idx["teagarden_air_temp"]]);
-    document.getElementById("envHumi").textContent = roundInt(last[idx["teagarden_air_humidity"]]);
+    document.getElementById("envTemp").textContent=roundInt(last[idx["teagarden_air_temp"]]);
+    document.getElementById("envHumi").textContent=roundInt(last[idx["teagarden_air_humidity"]]);
 
+    const depthKey=depth.toLowerCase();
     const tbody=document.getElementById("tbody");
     tbody.innerHTML="";
 
-    const depthKey = depth.toLowerCase();  // "surface" / "15cm" / "25cm"
-
     for(let s=1;s<=CONFIG.stationCount;s++){
-      const p=`station${s}_${depthKey}`; // e.g. station1_surface
-
-      const soilTemp = roundInt(last[idx[`${p}_soiltemp`]]);
-      const soilMoist = roundInt(last[idx[`${p}_soilmoisture`]]);
-      const nitrogen = roundInt(last[idx[`${p}_nitrogen`]]);
-      const phosphorus = roundInt(last[idx[`${p}_phosphorus`]]);
-      const potassium = roundInt(last[idx[`${p}_potassium`]]);
-
-      // AI 通知檢查
-      checkMoisture(s, soilMoist);
-      checkNPK(s, nitrogen, phosphorus, potassium);
-      checkSoilTemp(s, soilTemp);
+      const p=`station${s}_${depthKey}`;
+      const soilTemp=roundInt(last[idx[`${p}_soiltemp`]]);
+      const soilMoist=roundInt(last[idx[`${p}_soilmoisture`]]);
+      const n=roundInt(last[idx[`${p}_nitrogen`]]);
+      const p2=roundInt(last[idx[`${p}_phosphorus`]]);
+      const k=roundInt(last[idx[`${p}_potassium`]]);
 
       const tr=document.createElement("tr");
-      tr.innerHTML = `
+      tr.innerHTML=`
         <td>第${s}站</td>
-        <td class="${colorClass('temp', soilTemp)}">${soilTemp}</td>
-        <td class="${colorClass('moist', soilMoist)}">${soilMoist}</td>
-        <td class="${colorClass('n', nitrogen)}">${nitrogen}</td>
-        <td class="${colorClass('p', phosphorus)}">${phosphorus}</td>
-        <td class="${colorClass('k', potassium)}">${potassium}</td>
+        <td class="${colorClass("temp",soilTemp)}">${soilTemp}</td>
+        <td class="${colorClass("moist",soilMoist)}">${soilMoist}</td>
+        <td class="${colorClass("n",n)}">${n}</td>
+        <td class="${colorClass("p",p2)}">${p2}</td>
+        <td class="${colorClass("k",k)}">${k}</td>
       `;
       tbody.appendChild(tr);
     }
-
-  }catch(e){ console.warn("CSV 錯誤：",e); }
+  }catch(e){
+    console.error("CSV 錯誤:",e);
+  }
 }
 
-/* ================================
-   天氣 API
-================================ */
+/* ------------------------------
+   天氣
+-------------------------------- */
 async function refreshWeather(){
   try{
-    const url=`https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0001-001?Authorization=${CONFIG.cwaAuth}&format=JSON&StationId=${CONFIG.cwaStation}`;
-    const res=await fetch(url);
-    const js=await res.json();
+    const URL=`https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0001-001?Authorization=${CONFIG.cwaAuth}&format=JSON&StationId=${CONFIG.cwaStation}`;
+    const js=await (await fetch(URL)).json();
     const st=js.records?.Station?.[0];
-    const w=st?.WeatherElement||{};
+    if(!st)return;
 
-    document.getElementById("weatherDesc").textContent=w.Weather||"—";
-    const t = roundInt(w.AirTemperature);
-    const h = roundInt(w.RelativeHumidity);
-    const r = roundInt(w.Now?.Precipitation);
+    const w=st.WeatherElement;
 
-    document.getElementById("weatherTemp").textContent=t;
-    document.getElementById("weatherHumi").textContent=h;
-    document.getElementById("rainfall").textContent=r;
+    const rain=roundInt(w.Now.Precipitation);
+    const temp=roundInt(w.AirTemperature);
+    const humi=roundInt(w.RelativeHumidity);
+
+    document.getElementById("weatherDesc").textContent=w.Weather;
+    document.getElementById("weatherTemp").textContent=temp;
+    document.getElementById("weatherHumi").textContent=humi;
+    document.getElementById("rainfall").textContent=rain;
 
     document.getElementById("weatherIcon").src =
       (w.Weather||"").includes("雨")
       ? "https://img.icons8.com/emoji/48/cloud-with-rain.png"
       : "https://img.icons8.com/emoji/48/sun-emoji.png";
 
-    weatherTime = (st?.ObsTime?.DateTime||"").replace("T"," ").slice(0,19) || "—";
-    updateFooter();
-
-    // 雨量通知檢查
-    checkRain(r);
+    weatherTime = st.ObsTime.DateTime.replace("T"," ").slice(0,19);
 
   }catch(e){
-    console.warn("氣象錯誤:", e);
+    console.error("天氣錯誤:",e);
   }
 }
 
-/* ================================
-   按鈕、倒數、時鐘
-================================ */
+/* ------------------------------
+   切換層級按鈕
+-------------------------------- */
 document.querySelectorAll(".depth-btn").forEach(btn=>{
-  btn.addEventListener("click",()=>{
+  btn.onclick=()=>{
     document.querySelectorAll(".depth-btn").forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
-    const depth = btn.getAttribute("data-depth"); // Surface / 15cm / 25cm
-    refreshSheet(depth);
-  });
+    refreshSheet(btn.dataset.depth);
+  };
 });
 
-document.getElementById("btnFullscreen").onclick=()=>document.documentElement.requestFullscreen?.();
+/* ------------------------------
+   全螢幕
+-------------------------------- */
+document.getElementById("btnFullscreen").onclick=
+  ()=>document.documentElement.requestFullscreen();
 
-/* 時鐘 */
+/* ------------------------------
+   時鐘 + 倒數
+-------------------------------- */
+let remainingSec=CONFIG.autoRefreshMinutes*60;
+
+setInterval(()=>{
+  remainingSec--;
+  if(remainingSec<=0) location.reload();
+  document.getElementById("footerInfo").textContent =
+    `氣象站：${weatherTime} ｜ 感測器：${genTime} ｜ 🔄 倒數：${Math.floor(remainingSec/60)}:${pad(remainingSec%60)}`;
+},1000);
+
 (function clockTick(){
   document.getElementById("mainClock").textContent=nowStr();
   document.getElementById("dateBox").textContent=dateStr();
   requestAnimationFrame(()=>setTimeout(clockTick,250));
 })();
 
-/* 倒數 */
-setInterval(()=>{
-  remainingSec--;
-  if(remainingSec<=0){
-    // 到時間重新整理頁面
-    location.replace(location.href.split("?")[0]+"?t="+Date.now());
-    return;
-  }
-  updateFooter();
-},1000);
-
-/* 初始化 */
+/* ------------------------------
+   初始化
+-------------------------------- */
 refreshSheet("Surface");
 refreshWeather();
 </script>
@@ -537,8 +403,8 @@ refreshWeather();
   intent="WELCOME"
   chat-title="瑞成茶園智慧助手"
   agent-id="8b30913c-be1a-4cd9-9309-136c81726d04"
-  language-code="zh-tw"
-></df-messenger>
+  language-code="zh-tw">
+</df-messenger>
 
 </body>
 </html>
