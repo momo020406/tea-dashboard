@@ -8,7 +8,7 @@
 <style>
 :root{
   --bg:#CDEDC7;
-  --panel:#245953
+  --panel:#245953;
   --tile:#E7F6E7;
   --text:#0B2D2A;
   --num:#0f172a;
@@ -214,13 +214,13 @@ function roundInt(x){if(x==null||x==='')return'—';const n=Number(x);return isF
 // 呼叫你的 GAS Web App 來推 LINE
 async function sendLine(title, body){
   try{
-    await fetch("https://script.google.com/macros/s/AKfycby9dtlnXGOFLyiAca9PTVk18uh0hGnfYNOmoITefgrvaP5lp-f9UnD9e95pl1GRIqEBvQ/exec",{
+    await fetch("https://script.google.com/macros/s/AKfycbwN1KxcZiVb7qJxciLskIzDSB06-Z1KJNGo4BsNJh3wgqd9xAoYF-_1lm0W4RgNPeYPRw/exec",{
       method:"POST",
       headers:{ "Content-Type":"application/json" },
       body: JSON.stringify({ title, message: body })
     });
   }catch(e){
-    console.warn("LINE Notify 發送失敗：", e);
+    console.warn("LINE Messaging API 發送失敗：", e);
   }
 }
 
@@ -382,16 +382,14 @@ function checkOffline() {
     alertTea("⚠ 感測器掉線", "30 秒未收到資料更新");
 
     // 📌 正式推播到你的最新 GAS（Messaging API）
-    fetch("https://script.google.com/macros/s/AKfycbwN1KxcZiVb7qJxciLskIzDSB06-Z1KJNGo4BsNJh3wgqd9xAoYF-_1lm0W4RgNPeYPRw/exec", {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        title: "⚠ 感測器掉線警報",
-        message: "⚠ 30 秒未收到任何資料更新（可能掉線）"
-      })
-    })
+fetch("https://script.google.com/macros/s/AKfycbwN1KxcZiVb7qJxciLskIzDSB06-Z1KJNGo4BsNJh3wgqd9xAoYF-_1lm0W4RgNPeYPRw/exec", {
+  method: "POST",
+  headers: { "Content-Type": "application/json"},
+  body: JSON.stringify({
+    title: "⚠ 感測器掉線警報",
+    message: "⚠ 30 秒未收到任何資料更新（可能掉線）"
+  })
+})
     .then(r => r.json())
     .then(res => console.log("LINE 推播成功：", res))
     .catch(err => console.error("LINE 推播失敗：", err));
