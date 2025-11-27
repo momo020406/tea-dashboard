@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>瑞成智慧茶園 - 即時儀表板 v6.9</title>
+<style>
+    /*  https://script.google.com/macros/s/AKfycbydBypZcNm9Gb4uz_02ATyWhKw4dmvaYgExpjyz_1_nm9wNGd9H4DmWqIj-Qlth94qC/exec  正常回答 tea123 */
+    /*  https://script.google.com/macros/s/AKfycbxsX8kHFNPb7481PeQv2VukW8JYEYa-qNBUhysRDkczXvCwX9BxtE-hJe48QG53P1Hbyg/exec     正常回答   tea112603      */
+:root{
+  --bg:#CDEDC7;
+  --panel:#245953;
+  --tile:#E7F6E7;
+  --text:#0B2D2A;
+  --num:#0f172a;
+  --ok:#16a34a;
+  --radius:18px;
+  --gap:14px;
+}
+html,body{
+  height:100%;margin:0;background:var(--bg);
+  font-family:"Microsoft JhengHei",system-ui,sans-serif;color:var(--text);
+}
+.wrap{max-width:1280px;margin:auto;padding:18px;}
+header{display:grid;gap:var(--gap);
+  grid-template-columns:1.2fr 1fr 1.2fr;align-items:stretch;}
+.title{background:#e8f7ee;border:4px solid var(--panel);
+  border-radius:var(--radius);display:flex;align-items:center;
+  justify-content:center;flex-direction:column;padding:12px;}
+.title h1{margin:6px 0 2px 0;font-size:44px;letter-spacing:4px;}
+.clock,.datebox{
+  background:#fff;border:4px solid var(--panel);
+  border-radius:var(--radius);display:flex;align-items:center;
+  justify-content:center;flex-direction:column;font-weight:700;}
+.clock{font-size:46px;}
+.datebox{font-size:36px;font-weight:800;}
+.source-note {
+  font-size: 50%; 
+  color: #444;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+/* 上方兩個面板 */
+.top-panels{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);margin-top:var(--gap);}
+.panel{background:#fff;border:4px solid var(--panel);border-radius:var(--radius);padding:12px;}
+.panel h2{margin:0 0 8px 0;font-size:28px}
+
+/* 天氣 */
+.weather-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;background:var(--tile);
+  border-radius:14px;padding:12px;align-items:start;justify-items:start;}
+.weather-cell{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700;line-height:1.4}
+.weather-cell img{width:36px;height:36px;}
+
+/* 環境感測 */
+.env-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:var(--tile);
+  border-radius:14px;padding:12px;align-items:center;justify-items:center;}
+.env-cell{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700;color:var(--num);}
+.env-cell img{width:50px;height:50px;}
+.env-cell .value{font-size:36px;font-weight:800}
+
+/* 表格 */
+.table-wrap{margin-top:var(--gap);background:#fff;border:4px solid var(--panel);
+  border-radius:var(--radius);padding:14px}
+.table-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:10px;}
+.table-title h3{margin:0;font-size:26px}
+
+/* 統一按鈕 */
+.btn{
+  background:var(--panel);
+  color:#fff;
+  border:none;
+  border-radius:999px;
+  padding:10px 0;
+  width:130px;
+  font-size:20px;
+  font-weight:800;
+  cursor:pointer;
+  letter-spacing:1px;
+  text-align:center;
+}
+.btn:active{transform:translateY(1px);}
+.depth-btn.active{background:var(--ok);}
+
+table{width:100%;border-collapse:separate;border-spacing:0 10px}
+thead th{font-size:18px;color:#334155;text-align:center}
+tbody td,thead th{padding:10px 8px}
+tbody tr{background:var(--tile);}
+tbody tr td{font-size:22px;text-align:center;font-weight:700;color:var(--num)}
+tbody tr td:first-child{font-weight:800;color:#1f2937}
+
+/* footer */
+.footer-line{color:#2563eb;font-size:15px;margin-top:10px;text-align:center;
+  border-top:2px solid #a3bfa3;padding-top:6px;}
+
+/* 手機 */
+@media (max-width:768px){
+  header{grid-template-columns:1fr !important;}
+  .title h1{font-size:32px}
+  .clock{font-size:32px}
+  .datebox{font-size:24px}
+  .top-panels{grid-template-columns:1fr;}
+  .env-grid{grid-template-columns:1fr;}
+  tbody tr td{font-size:18px}
+  .table-title {flex-direction:column;align-items:center;gap:12px;}
+  .depth-buttons {
+    display:grid;grid-template-columns:repeat(2,1fr);
+    gap:10px 14px;justify-items:center;
+  }
+  .btn{width:120px;font-size:18px;}
+}
+/* 電腦版：同一行、右對齊 */
+.weather-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+  font-size: 28px;
+}
+
+.wt-left {
+  font-weight: 700;
+}
+
+.wt-right {
+  font-size: 55%;
+  color: #444;
+  font-weight: 500;
+  white-space: nowrap;  /* 防止跑行 */
+}
+
+/* 📱 手機版：來源移到第二行且靠右 */
+@media (max-width: 600px) {
+  .weather-title {
+    flex-wrap: wrap;   /* 允許換行 */
+  }
+
+  .wt-right {
+    width: 100%;
+    text-align: right;
+    margin-top: 4px;
+  }
+}
+
+/* ===== 數據顏色系統 ===== */
+.val-ok { color:#0f9d58 !important; font-weight:900; }
+.val-warn { color:#f4b400 !important; font-weight:900; }
+.val-bad { color:#db4437 !important; font-weight:900; }
+.val-high { color:#c71585 !important; font-weight:900; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="datebox" id="dateBox">--</div>
+    <div class="title"><h1>瑞成智慧茶園</h1><small>Real-time Dashboard</small></div>
+    <div class="clock"><div id="mainClock">00:00:00</div></div>
+  </header>
+
+  <!-- ============================= -->
+  <!--          天氣面板            -->
+  <!-- ============================= -->
+  <div class="top-panels">
+    <section class="panel">
+<h2 class="weather-title">
+  <span class="wt-left">南投 名間鄉天氣狀況</span>
+  <span class="wt-right">(資料來源：氣象署)</span>
+</h2>
+      <div class="weather-grid">
+        <div class="weather-cell"><img id="weatherIcon" src=""><span>天氣：<span id="weatherDesc">—</span></span></div>
+        <div class="weather-cell"><img src="https://img.icons8.com/emoji/48/thermometer-emoji.png"><span>氣溫：<span id="weatherTemp">—</span> °C</span></div>
+        <div class="weather-cell"><img src="https://img.icons8.com/color/48/humidity.png"><span>濕度：<span id="weatherHumi">—</span> %</span></div>
+        <div class="weather-cell"><img src="https://img.icons8.com/emoji/48/umbrella-with-rain-drops.png"><span>降雨量：<span id="rainfall">—</span> mm</span></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>茶園溫溼度感測器</h2>
+      <div class="env-grid">
+        <div class="env-cell"><img src="https://img.icons8.com/emoji/48/thermometer-emoji.png"><div><span>溫度</span><br><span class="value" id="envTemp">—</span></div></div>
+        <div class="env-cell"><img src="https://img.icons8.com/color/48/humidity.png"><div><span>濕度</span><br><span class="value" id="envHumi">—</span></div></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============================= -->
+  <!--     土壤資料 + 顏色變化      -->
+  <!-- ============================= -->
+<!-- ============================= -->
+<!--     土壤資料 + 顏色變化      -->
+<!-- ============================= -->
+<section class="table-wrap">
+  <div class="table-title">
+    <h3>各站土壤數據</h3>
+
+    <div class="depth-buttons"> 
+      <button class="btn depth-btn active" data-depth="Surface">表面層</button>
+      <button class="btn depth-btn" data-depth="15cm">15 cm 層</button>
+      <button class="btn depth-btn" data-depth="25cm">25 cm 層</button>
+      <button class="btn" id="btnFullscreen">全螢幕</button>
+      <button class="btn" id="btnNotify">🔔 通知測試</button>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>項目</th><th>溫度 (°C)</th><th>含水率 (%)</th>
+        <th>氮 (N)</th><th>磷 (P)</th><th>鉀 (K)</th>
+      </tr>
+    </thead>
+
+    <tbody id="tbody"></tbody>
+  </table>
+
+  <div class="footer-line" id="footerInfo">
+    氣象站更新時間：—　｜　感測器讀取時間：—　｜　🔄 下次更新倒數：—
+  </div>
+</section>   <!-- ← 正確結尾 -->
+
+
+<script>
+/* ================================ */
+/*           基本設定               */
+/* ================================ */
+/* ================================ */
+/*        🔔 網頁通知功能           */
+/* ================================ */
+async function sendNotification(title, body) {
+  // 若使用者尚未允許通知 → 先要求權限
+  if (Notification.permission !== "granted") {
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") {
+      alert("您尚未開啟通知權限");
+      return;
+    }
+  }
+
+  // 發送通知
+  new Notification(title, {
+    body: body,
+    icon: "https://img.icons8.com/color/96/tea.png"
+  });
+}
+
+// 按鈕事件
+document.getElementById("btnNotify").addEventListener("click", () => {
+
+  // A. 網頁通知
+  sendNotification("瑞成智慧茶園通知", "資料更新完成！（含 LINE 測試）");
+
+  // B. LINE 推播
+  sendLineNotify();
+});
+
+
+
+
+
+const CONFIG = {
+  sheetCsvUrl:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTS7HeQa-EF65JqRoZufcn3U6msKU7NSr0QqPezgqcuCHousSsK8z_IBHkdGvLNU0XZTcreLfnBwL0M/pub?output=csv",
+  cwaAuth:"CWA-4A8A0D9D-95EA-4DA0-A62C-2DC7A8909F06",
+  cwaStation:"C0I410",
+  autoRefreshMinutes:1,
+  stationCount:4
+};
+
+function pad(n){return n<10?'0'+n:n}
+function nowStr(){const d=new Date();return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}` }
+function dateStr(){const d=new Date();const w=['日','一','二','三','四','五','六'][d.getDay()];return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}（週${w}）` }
+function roundInt(x){if(x==null||x==='')return'—';const n=Number(x);return isFinite(n)?Math.round(n):String(x);}
+
+
+/* ================================ */
+/*        數值 → 顏色判斷           */
+/* ================================ */
+function colorClass(type, value){
+  if(value === "—" || value === "" || value == null) return "";
+  value = Number(value);
+
+  switch(type){
+    case "temp":
+      if(value < 10) return "val-warn";
+      if(value < 28) return "val-ok";
+      if(value < 35) return "val-warn";
+      return "val-bad";
+
+    case "moist":
+      if(value < 20) return "val-bad";
+      if(value < 35) return "val-warn";
+      if(value < 70) return "val-ok";
+      return "val-warn";
+
+    case "n":
+    case "p":
+    case "k":
+      if(value === 0) return "val-bad";
+      if(value < 20) return "val-warn";
+      return "val-ok";
+
+    default: return "";
+  }
+}
+
+
+/* ================================ */
+/*            更新表格              */
+/* ================================ */
+let weatherTime="—", genTime="—";
+let remainingSec = CONFIG.autoRefreshMinutes*60;
+const footer=document.getElementById("footerInfo");
+
+function updateFooter(){
+  const m=Math.floor(remainingSec/60), s=pad(remainingSec%60);
+  footer.textContent = `氣象站更新時間：${weatherTime}　｜　感測器讀取時間：${genTime}　｜　🔄 下次更新倒數：${m}:${s}`;
+}
+
+async function fetchCSV(){
+  const res=await fetch(CONFIG.sheetCsvUrl+"&t="+Date.now(),{cache:'no-store'});
+  const text=await res.text();
+  const lines=text.trim().split(/\r?\n/).map(l=>l.split(',').map(v=>v.replace(/^"|"$/g,'').trim()));
+  const cols=lines[0].map(c=>c.replace(/^\uFEFF/,'').trim());
+  const rows=lines.slice(1);
+  return {cols,rows};
+}
+
+function getLastValid(rows){
+  for(let i=rows.length-1;i>=0;i--) if(rows[i].some(v=>v!=="")) return rows[i];
+  return null;
+}
+
+async function refreshSheet(depth="Surface"){
+  try{
+    const {cols, rows} = await fetchCSV();
+    const last = getLastValid(rows);
+    if(!last) return;
+
+    const timeIdx = cols.findIndex(c=>c.toLowerCase().includes("time"));
+    genTime = timeIdx>=0 ? last[timeIdx] : "—";
+    updateFooter();
+
+    const idx={}; cols.forEach((c,i)=>idx[c.toLowerCase()]=i);
+
+    document.getElementById("envTemp").textContent = roundInt(last[idx["teagarden_air_temp"]]);
+    document.getElementById("envHumi").textContent = roundInt(last[idx["teagarden_air_humidity"]]);
+
+    const tbody=document.getElementById("tbody");
+    tbody.innerHTML="";
+
+    for(let s=1;s<=CONFIG.stationCount;s++){
+      const p=`station${s}_${depth.toLowerCase()}`;
+
+      const soilTemp = roundInt(last[idx[`${p}_soiltemp`]]);
+      const soilMoist = roundInt(last[idx[`${p}_soilmoisture`]]);
+      const nitrogen = roundInt(last[idx[`${p}_nitrogen`]]);
+      const phosphorus = roundInt(last[idx[`${p}_phosphorus`]]);
+      const potassium = roundInt(last[idx[`${p}_potassium`]]);
+// ⭐ AI 通知觸發（一定要加）
+checkMoisture(s, soilMoist);
+checkNPK(s, nitrogen, phosphorus, potassium);
+checkSoilTemp(s, soilTemp);
+      const tr=document.createElement("tr");
+      tr.innerHTML = `
+      <td>第${s}站</td>
+      <td class="${colorClass('temp', soilTemp)}">${soilTemp}</td>
+      <td class="${colorClass('moist', soilMoist)}">${soilMoist}</td>
+      <td class="${colorClass('n', nitrogen)}">${nitrogen}</td>
+      <td class="${colorClass('p', phosphorus)}">${phosphorus}</td>
+      <td class="${colorClass('k', potassium)}">${potassium}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+  }catch(e){ console.warn("CSV 錯誤：",e); }
+}
+
+/* ============================================
+   🌟 瑞成智慧茶園 AI 通知系統 v1.0
+   ============================================ */
+
+// 防止同一條通知一直跳
+let notified = {
+  moisture: {},
+  npk: {},
+  temp: {},
+  weather: false,
+  offline: false
+};
+
+// 觸發通知用
+function alertTea(title, msg) {
+  sendNotification(title, msg);
+  console.log("[通知] ", title, msg);
+}
+
+/* ============================================
+   📌 1. 土壤含水率異常
+   ============================================ */
+function checkMoisture(station, value) {
+  if (value < 20 && !notified.moisture[station]) {
+    alertTea(
+      "土壤含水率偏低",
+      `第 ${station} 站含水率僅 ${value}% ，可能偏乾燥`
+    );
+    notified.moisture[station] = true;
+  }
+}
+
+/* ============================================
+   📌 2. NPK 異常（0 or <20）
+   ============================================ */
+function checkNPK(station, n, p, k) {
+  if (n === 0 && !notified.npk[station + "_n"]) {
+    alertTea("N 氮值異常", `第 ${station} 站 氮(N)=0，請檢查感測器`);
+    notified.npk[station + "_n"] = true;
+  }
+  if (p === 0 && !notified.npk[station + "_p"]) {
+    alertTea("P 磷值異常", `第 ${station} 站 磷(P)=0，請檢查感測器`);
+    notified.npk[station + "_p"] = true;
+  }
+  if (k === 0 && !notified.npk[station + "_k"]) {
+    alertTea("K 鉀值異常", `第 ${station} 站 鉀(K)=0，請檢查感測器`);
+    notified.npk[station + "_k"] = true;
+  }
+}
+
+/* ============================================
+   📌 3. 土壤溫度異常
+   ============================================ */
+function checkSoilTemp(station, value) {
+  if (value > 35 && !notified.temp[station]) {
+    alertTea("土壤溫度過高", `第 ${station} 站土壤溫度 ${value}°C`);
+    notified.temp[station] = true;
+  }
+  if (value < 10 && !notified.temp[station + "_low"]) {
+    alertTea("土壤過冷", `第 ${station} 站土壤僅 ${value}°C`);
+    notified.temp[station + "_low"] = true;
+  }
+}
+
+/* ============================================
+   📌 4. 天氣開始下雨（一次性通知）
+   ============================================ */
+function checkRain(value) {
+  if (value > 0 && !notified.weather) {
+    alertTea("🌧 開始下雨", `名間鄉降雨量：${value} mm`);
+    notified.weather = true;
+  }
+}
+
+/* ============================================
+   📌 5. 感測器可能掉線
+   ============================================ */
+let lastUpdateTime = Date.now();
+
+function checkOffline() {
+  if (!notified.offline &&
+      Date.now() - lastUpdateTime > 30 * 1000) {
+
+    alertTea("⚠ 感測器掉線", "30 秒未收到資料更新");
+    notified.offline = true;
+  }
+}
+
+// 每 10 秒偵測是否掉線
+setInterval(checkOffline, 10000);
+
+/* ============================================
+   👇 整合到 refreshSheet()（你需加入這裡）
+   ============================================ */
+
+// 請在 refreshSheet() 裡每站資料處理後加入：
+
+// checkMoisture(stationNum, soilMoist);
+// checkNPK(stationNum, nitrogen, phosphorus, potassium);
+// checkSoilTemp(stationNum, soilTemp);
+
+
+
+
+
+    
+
+/* ================================ */
+/*             天氣 API            */
+/* ================================ */
+async function refreshWeather(){
+  try{
+    const url=`https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0001-001?Authorization=${CONFIG.cwaAuth}&format=JSON&StationId=${CONFIG.cwaStation}`;
+    const res=await fetch(url);
+    const js=await res.json();
+    const st=js.records?.Station?.[0];
+    const w=st?.WeatherElement||{};
+
+    document.getElementById("weatherDesc").textContent=w.Weather||"—";
+    document.getElementById("weatherTemp").textContent=roundInt(w.AirTemperature);
+    document.getElementById("weatherHumi").textContent=roundInt(w.RelativeHumidity);
+    document.getElementById("rainfall").textContent=roundInt(w.Now?.Precipitation);
+
+    document.getElementById("weatherIcon").src =
+      w.Weather?.includes("雨")
+      ? "https://img.icons8.com/emoji/48/cloud-with-rain.png"
+      : "https://img.icons8.com/emoji/48/sun-emoji.png";
+
+    weatherTime = (st?.ObsTime?.DateTime||"").replace("T"," ").slice(0,19) || "—";
+    updateFooter();
+
+  }catch(e){
+    console.warn("氣象錯誤:", e);
+  }
+}
+
+
+/* ================================ */
+/*       按鈕、倒數、時鐘           */
+/* ================================ */
+document.querySelectorAll(".depth-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".depth-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    refreshSheet(btn.getAttribute("data-depth"));
+  });
+});
+
+document.getElementById("btnFullscreen").onclick=()=>document.documentElement.requestFullscreen?.();
+
+/* 時鐘 */
+(function clockTick(){
+  document.getElementById("mainClock").textContent=nowStr();
+  document.getElementById("dateBox").textContent=dateStr();
+  requestAnimationFrame(()=>setTimeout(clockTick,250));
+})();
+
+/* 倒數 */
+setInterval(()=>{
+  remainingSec--;
+  if(remainingSec<=0){
+    location.replace(location.href.split("?")[0]+"?t="+Date.now());
+    return;
+  }
+  updateFooter();
+},1000);
+/* ================================
+   🔔 LINE 推播功能（Web → GAS）
+   ================================ */
+/* ================================
+   🔔 LINE 群發推播功能（Web → GAS）
+   ================================ */
+function sendLineNotify() {
+  fetch("https://script.google.com/macros/s/AKfycbyKfGJmOvtmoTtVDGxU_1wgjcyQ3VXCuffSIBmtyUBFdM4f2-939Sn7izfMQot-0Iwo/exec", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `title=🔔 群發通知&message=這是來自智慧茶園儀表板的群發 LINE 測試通知！`
+  })
+  .then(r => r.text())
+  .then(txt => console.log("[LINE 群發成功]", txt))
+  .catch(err => console.error("[LINE 群發錯誤]", err));
+}
+
+
+
+/* 初始化 */
+refreshSheet();
+refreshWeather();
+</script>
+
+
+
+<!-- Dialogflow -->
+<script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+<df-messenger
+  intent="WELCOME"
+  chat-title="瑞成茶園智慧助手"
+  agent-id="8b30913c-be1a-4cd9-9309-136c81726d04"
+  language-code="zh-tw"
+></df-messenger>
+
+
+
+</body>
+
+</html>  
+
+
+
+
+
+
+
