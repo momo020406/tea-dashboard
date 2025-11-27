@@ -109,38 +109,41 @@ tbody tr td:first-child{font-weight:800;color:#1f2937}
   }
   .btn{width:120px;font-size:18px;}
 }
-/* 電腦版：同一行、右對齊 */
+/* 電腦版：兩個都靠左，同一行 */
 .weather-title {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  flex-wrap: nowrap;
+  gap: 6px;          /* 兩者之間留一點距離，避免黏住 */
   font-size: 28px;
 }
 
+/* 左邊標題 */
 .wt-left {
   font-weight: 700;
 }
 
+/* 右邊來源（但電腦版仍然靠左） */
 .wt-right {
-  font-size: 55%;
+  font-size: 60%;
   color: #444;
   font-weight: 500;
-  white-space: nowrap;  /* 防止跑行 */
+  white-space: nowrap;
 }
 
-/* 📱 手機版：來源移到第二行且靠右 */
+
+/* 📱 手機版：來源移到第二行 + 靠右 */
 @media (max-width: 600px) {
   .weather-title {
-    flex-wrap: wrap;   /* 允許換行 */
+    flex-wrap: wrap;            /* 允許換行 */
   }
 
   .wt-right {
-    width: 100%;
-    text-align: right;
+    width: 100%;                /* 讓它占一行 */
+    text-align: right;          /* 靠右 */
     margin-top: 4px;
   }
 }
+
 
 /* ===== 數據顏色系統 ===== */
 .val-ok { color:#0f9d58 !important; font-weight:900; }
