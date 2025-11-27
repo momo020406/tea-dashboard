@@ -8,7 +8,7 @@
 <style>
 :root{
   --bg:#CDEDC7;
-  --panel:#245953;
+  --panel:#245953
   --tile:#E7F6E7;
   --text:#0B2D2A;
   --num:#0f172a;
@@ -378,19 +378,28 @@ function checkOffline() {
   if (!notified.offline &&
       Date.now() - lastUpdateTime > 30 * 1000) {
 
+    // 本地彈窗
     alertTea("⚠ 感測器掉線", "30 秒未收到資料更新");
+
+    // 📌 正式推播到 GAS（Messaging API）
     fetch("https://script.google.com/macros/s/AKfycby9dtlnXGOFLyiAca9PTVk18uh0hGnfYNOmoITefgrvaP5lp-f9UnD9e95pl1GRIqEBvQ/exec", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    title: "第 1 站含水率過低",
-    message: "目前含水率僅 10%，請注意"
-  })
-});
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        title: "⚠ 感測器掉線警報",
+        message: "第 1 站：超過 30 秒未收到資料更新"
+      })
+    })
+    .then(r => r.json())
+    .then(res => console.log("LINE 推播成功：", res))
+    .catch(err => console.error("LINE 推播失敗：", err));
 
     notified.offline = true;
   }
 }
+
 // 每 10 秒偵測一次
 setInterval(checkOffline, 10000);
 
