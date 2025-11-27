@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>LINE 推播測試頁</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+        .btn {
+            padding: 15px 30px;
+            font-size: 20px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        #result { margin-top: 20px; font-weight: bold; padding: 10px; border: 1px solid #ccc; background: #f0f0f0; }
+    </style>
+</head>
+<body>
+
+    <h1>LINE Messaging API POST 測試</h1>
+    <p>點擊按鈕，發送 POST 請求到您的 Google Apps Script。</p>
+    
+    <button class="btn" onclick="sendTestMessage()">發送測試訊息到 LINE</button>
+    
+    <div id="result">--- 點擊按鈕查看結果 ---</div>
+
+    <script>
+        // ⭐ 1. 請將此處替換為您的實際 GAS 網址 ⭐
+        const GAS_PUSH_URL = "YOUR_GAS_URL/exec"; 
+
+        function sendTestMessage() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = '發送中...';
+
+            fetch(GAS_PUSH_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    title: "🔔 [測試網頁] 通知", 
+                    message: "這是來自純測試網頁的 POST 請求！" 
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    // 如果 HTTP 狀態碼不是 2xx (例如 404, 500)，會在這裡報錯
+                    resultDiv.textContent = `🚨 HTTP 錯誤: ${response.status} ${response.statusText}. 請檢查 GAS 網址是否正確。`;
+                    console.error('HTTP Error:', response.status, response.statusText);
+                    return response.text().then(text => { console.error('Response Body:', text); return Promise.reject(text); });
+                }
+                return response.json(); // 嘗試解析 JSON
+            })
+            .then(data => {
+                // GAS 應回傳 { status: "ok" }
+                resultDiv.textContent = `✅ 推播成功！GAS 回應: ${JSON.stringify(data)}`;
+                console.log('GAS Response Data:', data);
+                // 檢查 LINE 是否收到訊息
+            })
+            .catch(error => {
+                // 網路連線錯誤或 CORS 錯誤會在這裡被捕獲
+                resultDiv.textContent = `❌ 網路/CORS 錯誤: ${error.message}. 請檢查 GAS 部署權限。`;
+                console.error('Fetch Error:', error);
+            });
+        }
+    </script>
+
+</body>
+</html>
