@@ -379,6 +379,15 @@ function checkOffline() {
       Date.now() - lastUpdateTime > 30 * 1000) {
 
     alertTea("⚠ 感測器掉線", "30 秒未收到資料更新");
+    fetch("https://script.google.com/macros/s/AKfycby9dtlnXGOFLyiAca9PTVk18uh0hGnfYNOmoITefgrvaP5lp-f9UnD9e95pl1GRIqEBvQ/exec", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    title: "第 1 站含水率過低",
+    message: "目前含水率僅 10%，請注意"
+  })
+});
+
     notified.offline = true;
   }
 }
