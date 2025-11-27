@@ -509,16 +509,20 @@ setInterval(()=>{
 /* ================================
    🔔 LINE 推播功能（Web → GAS）
    ================================ */
+/* ================================
+   🔔 LINE 群發推播功能（Web → GAS）
+   ================================ */
 function sendLineNotify() {
-  fetch("https://script.google.com/macros/s/AKfycbxTU2i21HfYT26PX2-B12OhACW8nlvSRGg4EoqNROyEE3M9b-2AupcYKIOuQzVDfO7J_Q/exec", {
+  fetch("https://script.google.com/macros/s/AKfycbTU2i21HfYT26PX2-B12OhACW8nlvSRGg4EoqNROyEE3M9b-2AupcYKIOuQzVDfO7J_Q/exec", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `title=🔔 通知測試&message=這是來自智慧茶園儀表板的 LINE 測試通知！`
+    body: `title=🔔 群發通知&message=這是來自智慧茶園儀表板的群發 LINE 測試通知！&broadcast=1`
   })
   .then(r => r.text())
-  .then(txt => console.log("[LINE 推播成功]", txt))
-  .catch(err => console.error("[LINE 推播錯誤]", err));
+  .then(txt => console.log("[LINE 群發成功]", txt))
+  .catch(err => console.error("[LINE 群發錯誤]", err));
 }
+
 
 /* 初始化 */
 refreshSheet();
