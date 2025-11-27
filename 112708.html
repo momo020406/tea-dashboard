@@ -154,36 +154,38 @@ tbody tr td:first-child{font-weight:800;color:#1f2937}
   <!-- ============================= -->
   <!--     土壤資料 + 顏色變化      -->
   <!-- ============================= -->
-  <div class="table-wrap">
-    <div class="table-title">
-        <h3>各站土壤數據</h3>
-      
-        <div class="depth-buttons"> 
-          <button class="btn depth-btn active" data-depth="Surface">表面層</button>
-          <button class="btn depth-btn" data-depth="15cm">15 cm 層</button>
-          <button class="btn depth-btn" data-depth="25cm">25 cm 層</button>
-          <button class="btn" id="btnFullscreen">全螢幕</button>
-      
-          <!-- 🔔 新增通知按鈕 -->
-          <button class="btn" id="btnNotify">🔔 通知測試</button>
-        </div>
-      </div>
-      
+<!-- ============================= -->
+<!--     土壤資料 + 顏色變化      -->
+<!-- ============================= -->
+<section class="table-wrap">
+  <div class="table-title">
+    <h3>各站土壤數據</h3>
 
-    </div>
-
-    <table>
-      <thead>
-        <tr><th>項目</th><th>溫度 (°C)</th><th>含水率 (%)</th><th>氮 (N)</th><th>磷 (P)</th><th>鉀 (K)</th></tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
-
-    <div class="footer-line" id="footerInfo">
-      氣象站更新時間：—　｜　感測器讀取時間：—　｜　🔄 下次更新倒數：—
+    <div class="depth-buttons"> 
+      <button class="btn depth-btn active" data-depth="Surface">表面層</button>
+      <button class="btn depth-btn" data-depth="15cm">15 cm 層</button>
+      <button class="btn depth-btn" data-depth="25cm">25 cm 層</button>
+      <button class="btn" id="btnFullscreen">全螢幕</button>
+      <button class="btn" id="btnNotify">🔔 通知測試</button>
     </div>
   </div>
-</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>項目</th><th>溫度 (°C)</th><th>含水率 (%)</th>
+        <th>氮 (N)</th><th>磷 (P)</th><th>鉀 (K)</th>
+      </tr>
+    </thead>
+
+    <tbody id="tbody"></tbody>
+  </table>
+
+  <div class="footer-line" id="footerInfo">
+    氣象站更新時間：—　｜　感測器讀取時間：—　｜　🔄 下次更新倒數：—
+  </div>
+</section>   <!-- ← 正確結尾 -->
+
 
 <script>
 /* ================================ */
