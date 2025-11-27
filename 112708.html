@@ -363,7 +363,7 @@ function alertTea(title, msg) {
    📌 1. 土壤含水率異常
    ============================================ */
 function checkMoisture(station, value) {
-  if (value < 100 && !notified.moisture[station]) {
+  if (value < 20 && !notified.moisture[station]) {
     alertTea(
       "土壤含水率偏低",
       `第 ${station} 站含水率僅 ${value}% ，可能偏乾燥`
