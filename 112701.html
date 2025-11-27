@@ -315,7 +315,10 @@ async function refreshSheet(depth="Surface"){
       const nitrogen = roundInt(last[idx[`${p}_nitrogen`]]);
       const phosphorus = roundInt(last[idx[`${p}_phosphorus`]]);
       const potassium = roundInt(last[idx[`${p}_potassium`]]);
-
+// ⭐ AI 通知觸發（一定要加）
+checkMoisture(s, soilMoist);
+checkNPK(s, nitrogen, phosphorus, potassium);
+checkSoilTemp(s, soilTemp);
       const tr=document.createElement("tr");
       tr.innerHTML = `
       <td>第${s}站</td>
@@ -519,6 +522,7 @@ refreshWeather();
 </body>
 
 </html>  
+
 
 
 
