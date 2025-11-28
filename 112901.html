@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>瑞成智慧茶園 - 即時儀表板 v7.3</title>
+
+<style>
+/* ===== 基本顏色 ===== */
+:root{
+  --bg:#CDEDC7;
+  --panel:#245953;
+  --tile:#E7F6E7;
+  --text:#0B2D2A;
+  --num:#0f172a;
+  --ok:#16a34a;
+  --radius:18px;
+  --gap:14px;
+}
+
+/* ===== Layout ===== */
+html,body{
+  height:100%;margin:0;background:var(--bg);
+  font-family:"Microsoft JhengHei",system-ui,sans-serif;color:var(--text);
+}
+.wrap{max-width:1280px;margin:auto;padding:18px;}
+
+header{
+  display:grid;gap:var(--gap);
+  grid-template-columns:1.2fr 1fr 1.2fr;
+  align-items:stretch;
+}
+
+.title{
+  background:#e8f7ee;
+  border:4px solid var(--panel);
+  border-radius:var(--radius);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;padding:12px;
+}
+.title h1{
+  margin:6px 0 2px 0;font-size:44px;letter-spacing:4px;
+}
+
+.clock,.datebox{
+  background:#fff;border:4px solid var(--panel);
+  border-radius:var(--radius);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  font-weight:700;
+}
+.clock{font-size:46px;}
+.datebox{font-size:36px;font-weight:800;}
+
+/* ===== 天氣區 ===== */
+.top-panels{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:var(--gap);
+  margin-top:var(--gap);
+}
+.panel{
+  background:#fff;border:4px solid var(--panel);
+  border-radius:var(--radius);padding:12px;
+}
+.panel h2{
+  margin:0 0 8px 0;font-size:28px;
+}
+
+.weather-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;
+  background:var(--tile);border-radius:14px;padding:12px;
+}
+.weather-cell{
+  display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700;
+}
+.weather-cell img{
+  width:36px;height:36px;
+}
+
+/* ===== 溫濕度 ===== */
+.env-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;
+  background:var(--tile);border-radius:14px;padding:12px;
+}
+.env-cell{
+  display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700;color:var(--num);
+}
+.env-cell img{
+  width:50px;height:50px;
+}
+.env-cell .value{
+  font-size:36px;font-weight:800
+}
+
+/* ===== 土壤表 ===== */
+.table-wrap{
+  margin-top:var(--gap);
+  background:#fff;border:4px solid var(--panel);
+  border-radius:var(--radius);padding:14px;
+}
+.table-title{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:10px;flex-wrap:wrap;gap:10px;
+}
+.table-title h3{
+  margin:0;font-size:26px;
+}
+.btn{
+  background:var(--panel);color:#fff;border:none;border-radius:999px;
+  padding:10px 0;width:130px;font-size:20px;font-weight:800;cursor:pointer;
+}
+.btn:active{
+  transform:translateY(1px);
+}
+.depth-btn.active{
+  background:var(--ok);
+}
+
+/* 通知開關 */
+#btnToggleNotify{
+  width:150px;background:#777;
+}
+#btnToggleNotify.on{
+  background:#16a34a !important;
+}
+#notifyStatus{
+  font-size:17px;font-weight:800;color:#0b2d2a;margin-left:8px;
+}
+
+/* 表格 */
+table{
+  width:100%;border-collapse:separate;border-spacing:0 10px;
+}
+thead th{
+  font-size:18px;color:#334155;text-align:center;
+}
+tbody td,thead th{
+  padding:10px 8px;
+}
+tbody tr{
+  background:var(--tile);
+}
+tbody tr td{
+  font-size:22px;text-align:center;font-weight:700;color:var(--num)
+}
+tbody tr td:first-child{
+  font-weight:800;color:#1f2937;
+}
+
+/* 底部資訊 */
+.footer-line{
+  color:#2563eb;font-size:15px;margin-top:10px;text-align:center;
+  border-top:2px solid #a3bfa3;padding-top:6px;
+}
+
+/* 數值顏色 */
+.val-ok   { color:#0f9d58 !important;font-weight:900; }
+.val-warn { color:#f4b400 !important;font-weight:900; }
+.val-bad  { color:#db4437 !important;font-weight:900; }
+
+/* ===========================
+   🌟 Dialogflow Messenger 鮮豔亮色主題
+   =========================== */
+df-messenger {
+  --df-messenger-bot-message: #00C853;       /* 亮綠（機器人訊息） */
+  --df-messenger-button-titlebar-color: #00E676;  /* 標題列亮綠 */
+  --df-messenger-chat-background-color: #E2FBE2;  /* 超淡茶綠背景 */
+  --df-messenger-font-color: #000;
+  --df-messenger-user-message: #245953;     /* 使用者訊息深綠 */
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+<header>
+  <div class="datebox" id="dateBox">--</div>
+  <div class="title">
+    <h1>瑞成智慧茶園</h1>
+    <small>Real-time Dashboard v7.3</small>
+  </div>
+  <div class="clock"><div id="mainClock">00:00:00</div></div>
+</header>
+
+
+  <!-- ======================= SCRIPT START ======================= -->
+<script>
+window.addEventListener("DOMContentLoaded",()=>{
+
+/* ============================================================
+   1. 通知開關（LocalStorage）
+   ============================================================ */
+let NOTIFY_ENABLED = true;
+if(localStorage.getItem("tea_notify")==="off"){ NOTIFY_ENABLED=false; }
+
+function updateNotifyUI(){
+  const btn=document.getElementById("btnToggleNotify");
+  const st =document.getElementById("notifyStatus");
+  if(NOTIFY_ENABLED){
+    btn.classList.add("on");
+    st.textContent="通知：已開啟";
+  }else{
+    btn.classList.remove("on");
+    st.textContent="通知：已關閉";
+  }
+}
+updateNotifyUI();
+
+document.getElementById("btnToggleNotify").onclick=()=>{
+  NOTIFY_ENABLED=!NOTIFY_ENABLED;
+  localStorage.setItem("tea_notify",NOTIFY_ENABLED?"on":"off");
+  updateNotifyUI();
+};
+
+/* ============================================================
+   2. 通知（LINE + WEB）
+   ============================================================ */
+async function sendNotification(title, body) {
+  if(!NOTIFY_ENABLED) return;
+
+  if(Notification.permission!=="granted"){
+    const perm=await Notification.requestPermission();
+    if(perm!=="granted") return;
+  }
+
+  new Notification(title,{
+    body,
+    icon:"https://img.icons8.com/color/96/tea.png"
+  });
+}
+
+function sendLineNotify(title,message){
+  if(!NOTIFY_ENABLED) return;
+
+  fetch("https://script.google.com/macros/s/AKfycbyHvIZqDqpG4vXJSYxzx2F7KhmrVzLFWB3R1Fzx7VYG080RPTtaUdqJgupV4ZPPyM3_2g/exec",{
+    method:"POST",
+    headers:{"Content-Type":"application/x-www-form-urlencoded"},
+    body:`title=${encodeURIComponent(title)}&message=${encodeURIComponent(message)}`
+  });
+}
+
+function alertTea(title,message){
+  if(!NOTIFY_ENABLED) return;
+  sendNotification(title,message);
+  sendLineNotify(title,message);
+  console.log("[AI 通知] ",title,message);
+}
+
+/* ============================================================
+   ⭐⭐ 3. AI 豪華版 N / P / K 彙整通知
+   ============================================================ */
+
+/*
+  nutrientAlert = {
+    "第一站": [ {type:"N", value:4}, {type:"P",value:5}, ... ],
+    "第二站": [],
+    ...
+  }
+*/
+let nutrientAlert = {
+  "第一站": [],
+  "第二站": [],
+  "第三站": [],
+  "第四站": []
+};
+
+const LIMIT = { N:20, P:15, K:10 };
+
+// 顏色等級
+function levelEmoji(type,value){
+  let L = LIMIT[type];
+  if(value < L*0.5) return "🔴（嚴重偏低）";
+  if(value < L*0.8) return "🟠（偏低）";
+  if(value < L)     return "🟡（略低）";
+  return "🟢（正常）";
+}
+
+// AI 建議
+function advice(type){
+  switch(type){
+    case "N": return "建議補充含氮肥（尿素、硫銨、硝酸銨）。";
+    case "P": return "補充磷肥（過磷酸鈣）。";
+    case "K": return "補充鉀肥（氯化鉀、硫酸鉀）。";
+  }
+  return "";
+}
+
+// ★ 每次數據進入 → 累積到 nutrientAlert
+function handleNPK(station,type,value){
+  if(value==="—" || value==null) return;
+  nutrientAlert[station].push({type,value});
+}
+
+// 產生最終匯總通知
+function buildNPKReport(){
+  let text = "📡 瑞成智慧茶園養分診斷報告\n（AI 自動分析）\n\n";
+
+  ["第一站","第二站","第三站","第四站"].forEach(st=>{
+    text += `【${st}】\n`;
+
+    if(nutrientAlert[st].length === 0){
+      text += "🟢 全部正常\n\n";
+      return;
+    }
+
+    let hasIssue=false;
+
+    nutrientAlert[st].forEach(item=>{
+      const {type,value} = item;
+      const mark = levelEmoji(type,value);
+      text += `${type}=${value} ${mark}\n`;
+      if(mark !== "🟢（正常）") hasIssue=true;
+    });
+
+    if(hasIssue){
+      text += "\n🔧 建議：\n";
+      nutrientAlert[st].forEach(item=>{
+        const {type,value}=item;
+        const mark = levelEmoji(type,value);
+        if(mark !== "🟢（正常）"){
+          text += `・${type} 偏低 → ${advice(type)}\n`;
+        }
+      });
+    }
+    text += "\n";
+  });
+
+  return text;
+}
+
+// 發送＋清空
+function sendAllNPKAlert(){
+  const msg = buildNPKReport();
+
+  // 全部正常 → 不通知
+  const allOK = Object.values(nutrientAlert).every(list =>
+    list.every(item => levelEmoji(item.type,item.value)==="🟢（正常）")
+  );
+  if(allOK) return;
+
+  alertTea("🌱 養分通知（AI 分析）", msg);
+
+  nutrientAlert = {
+    "第一站": [],
+    "第二站": [],
+    "第三站": [],
+    "第四站": []
+  };
+}
+
+/* ============================================================
+   ⭐ 4. 你的原本警報系統（濕度/溫度/雨/掉線）
+   ============================================================ */
+const ALERT_RULES={
+  moisture:{low:20},
+  temperature:{high:35,low:10},
+  rain:{min:0.1},
+  offline:{limitMinutes:10}
+};
+
+let notified={
+  moisture:{}, temp:{}, weather:false, offline:false
+};
+
+function checkMoisture(s,v){
+  if(v<ALERT_RULES.moisture.low && !notified.moisture[s]){
+    alertTea("土壤含水率偏低",`第 ${s} 站僅 ${v}%`);
+    notified.moisture[s]=true;
+  }
+}
+
+function checkSoilTemp(s,v){
+  const {high,low}=ALERT_RULES.temperature;
+  if(v>high && !notified.temp[s+"_high"]){
+    alertTea("土壤溫度過高",`第 ${s} 站 ${v}°C`);
+    notified.temp[s+"_high"]=true;
+  }
+  if(v<low && !notified.temp[s+"_low"]){
+    alertTea("土壤過冷",`第 ${s} 站僅 ${v}°C`);
+    notified.temp[s+"_low"]=true;
+  }
+}
+
+function checkRain(v){
+  if(v>=ALERT_RULES.rain.min && !notified.weather){
+    alertTea("🌧 開始下雨",`名間降雨量：${v} mm`);
+    notified.weather=true;
+  }
+}
+
+let lastUpdateTime=Date.now();
+function checkOffline(){
+  const limit=ALERT_RULES.offline.limitMinutes*60000;
+  if(!notified.offline && Date.now()-lastUpdateTime>limit){
+    alertTea("⚠ 感測器掉線",`${ALERT_RULES.offline.limitMinutes} 分鐘無更新`);
+    notified.offline=true;
+  }
+}
+setInterval(checkOffline,10000);
+
+/* ============================================================
+   5. CSV + 天氣 + 渲染表格
+   ============================================================ */
+const CONFIG={
+  sheetCsvUrl:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTS7HeQa-EF65JqRoZufcn3U6msKU7NSr0QqPezgqcuCHousSsK8z_IBHkdGvLNU0XZTcreLfnBwL0M/pub?output=csv",
+  cwaAuth:"CWA-4A8A0D9D-95EA-4DA0-A62C-2DC7A8909F06",
+  cwaStation:"C0I410",
+  autoRefreshMinutes:1,
+  stationCount:4
+};
+
+function pad(n){return n<10?"0"+n:n;}
+function nowStr(){
+  const d=new Date();
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+function dateStr(){
+  const d=new Date();
+  const w=["日","一","二","三","四","五","六"][d.getDay()];
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}（週${w}）`;
+}
+function roundInt(x){
+  if(x==null||x==="") return "—";
+  const n=Number(x);
+  return isFinite(n)?Math.round(n):String(x);
+}
+
+/* 數值顏色分類 */
+function colorClass(type,v){
+  if(v==="—") return "";
+  v=Number(v);
+  switch(type){
+    case "temp":  if(v<10) return "val-warn"; if(v<28) return "val-ok"; if(v<35)return"val-warn"; return"val-bad";
+    case "moist": if(v<20) return "val-bad"; if(v<35)return"val-warn"; if(v<70)return"val-ok"; return"val-warn";
+    case "n":
+    case "p":
+    case "k":
+      if(v===0) return "val-bad";
+      if(v<20)  return "val-warn";
+      return "val-ok";
+  }
+  return "";
+}
+
+let weatherTime="—", genTime="—";
+let remainingSec = CONFIG.autoRefreshMinutes*60;
+
+function updateFooter(){
+  const m=Math.floor(remainingSec/60);
+  const s=pad(remainingSec%60);
+  document.getElementById("footerInfo").textContent=
+    `氣象站更新時間：${weatherTime} ｜ 感測器讀取時間：${genTime} ｜ 🔄 下次更新倒數：${m}:${s}`;
+}
+
+async function fetchCSV(){
+  const res=await fetch(CONFIG.sheetCsvUrl+"&t="+Date.now());
+  const text=await res.text();
+  const lines=text.trim().split(/\r?\n/).map(l=>l.split(','));
+  return {cols:lines[0],rows:lines.slice(1)};
+}
+
+function getLastValid(rows){
+  for(let i=rows.length-1;i>=0;i--)
+    if(rows[i].some(v=>v!=="")) return rows[i];
+  return null;
+}
+
+async function refreshSheet(depth="Surface"){
+  try{
+    const {cols,rows}=await fetchCSV();
+    const last=getLastValid(rows);
+    if(!last) return;
+
+    const idx={};
+    cols.forEach((c,i)=>idx[c.toLowerCase()]=i);
+
+    genTime=last[idx["time"]]||"—";
+    lastUpdateTime=Date.now();
+    updateFooter();
+
+    document.getElementById("envTemp").textContent =
+      roundInt(last[idx["teagarden_air_temp"]]);
+
+    document.getElementById("envHumi").textContent =
+      roundInt(last[idx["teagarden_air_humidity"]]);
+
+    const tbody=document.getElementById("tbody");
+    tbody.innerHTML="";
+
+    for(let s=1;s<=CONFIG.stationCount;s++){
+      const p=`station${s}_${depth.toLowerCase()}`;
+
+      const soilTemp=roundInt(last[idx[`${p}_soiltemp`]]);
+      const soilMoist=roundInt(last[idx[`${p}_soilmoisture`]]);
+      const n=roundInt(last[idx[`${p}_nitrogen`]]);
+      const p2=roundInt(last[idx[`${p}_phosphorus`]]);
+      const k=roundInt(last[idx[`${p}_potassium`]]);
+
+      /* 原本 AI 基礎提醒 */
+      checkMoisture(s,soilMoist);
+      checkSoilTemp(s,soilTemp);
+
+      /* ★ 加入彙整式 NPK ★ */
+      handleNPK(`第${s}站`,"N",n);
+      handleNPK(`第${s}站`,"P",p2);
+      handleNPK(`第${s}站`,"K",k);
+
+      const tr=document.createElement("tr");
+      tr.innerHTML=`
+        <td>第${s}站</td>
+        <td class="${colorClass('temp',soilTemp)}">${soilTemp}</td>
+        <td class="${colorClass('moist',soilMoist)}">${soilMoist}</td>
+        <td class="${colorClass('n',n)}">${n}</td>
+        <td class="${colorClass('p',p2)}">${p2}</td>
+        <td class="${colorClass('k',k)}">${k}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    /* ★★ 四站全部跑完 → 發送一次彙整通知 ★★ */
+    sendAllNPKAlert();
+
+  }catch(e){
+    console.warn("CSV 錯誤:",e);
+  }
+}
+
+/* ============================================================
+   6. 天氣更新
+   ============================================================ */
+async function refreshWeather(){
+  try{
+    const url=
+      `https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0001-001?`+
+      `Authorization=${CONFIG.cwaAuth}&format=JSON&StationId=${CONFIG.cwaStation}`;
+
+    const res=await fetch(url);
+    const js=await res.json();
+    const st=js.records?.Station?.[0];
+    const w=st?.WeatherElement||{};
+
+    document.getElementById("weatherDesc").textContent = w.Weather || "—";
+    document.getElementById("weatherTemp").textContent = roundInt(w.AirTemperature);
+    document.getElementById("weatherHumi").textContent = roundInt(w.RelativeHumidity);
+    document.getElementById("rainfall").textContent = roundInt(w.Now?.Precipitation);
+
+    checkRain(Number(w.Now?.Precipitation||0));
+
+    document.getElementById("weatherIcon").src =
+      w.Weather?.includes("雨")
+        ? "https://img.icons8.com/emoji/48/cloud-with-rain.png"
+        : "https://img.icons8.com/emoji/48/sun-emoji.png";
+
+    weatherTime = st?.ObsTime?.DateTime?.replace("T"," ").slice(0,19) || "—";
+    updateFooter();
+
+  }catch(e){
+    console.warn("天氣錯誤:",e);
+  }
+}
+
+/* ============================================================
+   7. UI + 自動刷新
+   ============================================================ */
+document.querySelectorAll(".depth-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".depth-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+
+    refreshSheet(btn.dataset.depth);
+  });
+});
+
+document.getElementById("btnFullscreen").onclick=
+  ()=>document.documentElement.requestFullscreen?.();
+
+document.getElementById("btnNotify").onclick=
+  ()=>alertTea("🔔 測試通知","這是一則測試（含 LINE + Web）");
+
+(function tick(){
+  document.getElementById("mainClock").textContent=nowStr();
+  document.getElementById("dateBox").textContent=dateStr();
+  setTimeout(tick,250);
+})();
+
+setInterval(()=>{
+  remainingSec--;
+  if(remainingSec<=0){
+    location.replace(location.href.split("?")[0]+"?t="+Date.now());
+    return;
+  }
+  updateFooter();
+},1000);
+
+/* ============================================================
+   8. 初始化
+   ============================================================ */
+refreshSheet();
+refreshWeather();
+
+}); // DOM Loaded END
+</script>
+
+
+  <!-- ======================= Dialogflow Messenger Auto Fix ======================= -->
+<script>
+/* ============================================================
+   ⭐ df-messenger 自動修復機制（避免不顯示的 Bug）
+   ============================================================ */
+function ensureChatbotLoaded() {
+  const bot = document.querySelector("df-messenger");
+
+  if (bot && !bot.shadowRoot) {
+    console.warn("df-messenger 未初始化 → 重新建立...");
+
+    const attr = {
+      intent: bot.getAttribute("intent"),
+      "chat-title": bot.getAttribute("chat-title"),
+      "agent-id": bot.getAttribute("agent-id"),
+      "language-code": bot.getAttribute("language-code")
+    };
+
+    bot.remove();
+
+    const newBot = document.createElement("df-messenger");
+    for (const k in attr) newBot.setAttribute(k, attr[k]);
+    document.body.appendChild(newBot);
+  }
+}
+
+window.addEventListener("dfMessengerLoaded", () => {
+  console.log("df-messenger 成功載入！");
+});
+
+setTimeout(ensureChatbotLoaded, 1200);
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    setTimeout(ensureChatbotLoaded, 400);
+  }
+});
+</script>
+
+<!-- ======================= Dialogflow Messenger 主程式 ======================= -->
+<script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+
+<df-messenger
+  intent="WELCOME"
+  chat-title="瑞成茶園智慧助手"
+  agent-id="8b30913c-be1a-4cd9-9309-136c81726d04"
+  language-code="zh-tw"
+></df-messenger>
+
+</div> <!-- wrap 結尾 -->
+
+</body>
+</html>
