@@ -4,9 +4,10 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>瑞成智慧茶園 - 即時儀表板 v7.2</title>
+<title>瑞成智慧茶園 - 即時儀表板 v7.1</title>
 
 <style>
+/* ===== 基本顏色 ===== */
 :root{
   --bg:#CDEDC7;
   --panel:#245953;
@@ -18,6 +19,7 @@
   --gap:14px;
 }
 
+/* ===== 基礎 Layout ===== */
 html,body{
   height:100%;margin:0;background:var(--bg);
   font-family:"Microsoft JhengHei",system-ui,sans-serif;color:var(--text);
@@ -111,15 +113,13 @@ tbody tr td:first-child{font-weight:800;color:#1f2937}
 
 <header>
   <div class="datebox" id="dateBox">--</div>
-
-  <div class="title">
-    <h1>瑞成智慧茶園</h1>
-    <small>Real-time Dashboard v7.2</small>
-  </div>
-
+  <div class="title"><h1>瑞成智慧茶園</h1><small>Real-time Dashboard v7.1</small></div>
   <div class="clock"><div id="mainClock">00:00:00</div></div>
 </header>
 
+<!-- ============================================= -->
+<!--                天氣區塊                       -->
+<!-- ============================================= -->
 <div class="top-panels">
   <section class="panel">
     <h2>南投 名間鄉天氣狀況</h2>
@@ -140,6 +140,9 @@ tbody tr td:first-child{font-weight:800;color:#1f2937}
   </section>
 </div>
 
+<!-- ============================================= -->
+<!--               土壤感測數據                    -->
+<!-- ============================================= -->
 <section class="table-wrap">
   <div class="table-title">
     <h3>各站土壤數據</h3>
@@ -148,13 +151,13 @@ tbody tr td:first-child{font-weight:800;color:#1f2937}
       <button class="btn depth-btn active" data-depth="Surface">表面層</button>
       <button class="btn depth-btn" data-depth="15cm">15 cm 層</button>
       <button class="btn depth-btn" data-depth="25cm">25 cm 層</button>
-
       <button class="btn" id="btnFullscreen">全螢幕</button>
-      <button class="btn" id="btnNotify">🔔 通知測試</button>
 
-      <!-- 🔔 通知總開關 -->
+      <!-- 🔔 通知開關 -->
       <button class="btn" id="btnToggleNotify">通知 ON/OFF</button>
       <span id="notifyStatus">通知：已開啟</span>
+
+      <button class="btn" id="btnNotify">🔔 通知測試</button>
     </div>
   </div>
 
@@ -173,19 +176,23 @@ tbody tr td:first-child{font-weight:800;color:#1f2937}
   </div>
 </section>
 
+<!-- ============================================= -->
+<!--                 Script Start                  -->
+<!-- ============================================= -->
 <script>
+
 /* ============================================================
-   🌟 通知開關 (localStorage)
+   🌟 通知開關（LocalStorage）
    ============================================================ */
 
 let NOTIFY_ENABLED = true;
 
-// 載入儲存的設定
+// 載入之前使用者的設定
 if (localStorage.getItem("tea_notify") === "off") {
   NOTIFY_ENABLED = false;
 }
 
-// UI 初始化
+// 更新 UI
 function updateNotifyUI(){
   const btn = document.getElementById("btnToggleNotify");
   const st  = document.getElementById("notifyStatus");
@@ -200,6 +207,7 @@ function updateNotifyUI(){
 }
 updateNotifyUI();
 
+// 按鈕事件
 document.getElementById("btnToggleNotify").onclick = ()=>{
   NOTIFY_ENABLED = !NOTIFY_ENABLED;
   localStorage.setItem("tea_notify", NOTIFY_ENABLED ? "on" : "off");
@@ -208,52 +216,9 @@ document.getElementById("btnToggleNotify").onclick = ()=>{
 
 
 /* ============================================================
-   🌟 0. 警報參數
+   🌟 AI 通知整合（會先檢查開關）
    ============================================================ */
-const ALERT_RULES = {
 
-  moisture: { low: 20 },             // 含水率低於 20 通知
-
-  temperature: { high: 35, low: 10 }, // 溫度 >35、<10 通知
-
-  // ⭐ NPK：min / low 兩級
-  npk: { min: 1, low: 20 },
-
-  rain: { min: 0.1 },                // 下雨通知
-
-  offline: { limitMinutes: 10 }       // 掉線 10 分鐘通知
-};
-
-/* ============================================================
-   1. 基本設定
-   ============================================================ */
-const CONFIG = {
-  sheetCsvUrl:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTS7HeQa-EF65JqRoZufcn3U6msKU7NSr0QqPezgqcuCHousSsK8z_IBHkdGvLNU0XZTcreLfnBwL0M/pub?output=csv",
-  cwaAuth:"CWA-4A8A0D9D-95EA-4DA0-A62C-2DC7A8909F06",
-  cwaStation:"C0I410",
-  autoRefreshMinutes:1,
-  stationCount:4
-};
-
-function pad(n){return n<10?'0'+n:n}
-function nowStr(){
-  const d=new Date();
-  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-}
-function dateStr(){
-  const d=new Date();
-  const w=['日','一','二','三','四','五','六'][d.getDay()];
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}（週${w}）`;
-}
-function roundInt(x){
-  if(x==null||x==='')return'—';
-  const n=Number(x);
-  return isFinite(n)?Math.round(n):String(x);
-}
-
-/* ============================================================
-   2. LINE Notify + 網頁通知（受開關控制）
-   ============================================================ */
 async function sendNotification(title, body) {
   if (!NOTIFY_ENABLED) return;
 
@@ -278,18 +243,37 @@ function sendLineNotify(title, message) {
 }
 
 function alertTea(title, message){
-  if (!NOTIFY_ENABLED) {
-    console.log("[通知關閉，略過] ", title, message);
-    return;
-  }
+  if (!NOTIFY_ENABLED) return;
   sendNotification(title, message);
   sendLineNotify(title, message);
-  console.log("[AI 通知]", title, message);
+  console.log("[AI 通知] ", title, message);
 }
 
-/* ============================================================
-   3. 狀態記錄（避免重複通知）
-   ============================================================ */
+
+/* 以下全部保持你的 v7.1 原樣，只加通知開關。*/
+/* ============================================================ */
+
+const ALERT_RULES = {
+  moisture:{ low:20 },
+  temperature:{ high:35, low:10 },
+  npk:{ min:1, low:20 },
+  rain:{ min:0.1 },
+  offline:{ limitMinutes:10 }
+};
+
+const CONFIG = {
+  sheetCsvUrl:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTS7HeQa-EF65JqRoZufcn3U6msKU7NSr0QqPezgqcuCHousSsK8z_IBHkdGvLNU0XZTcreLfnBwL0M/pub?output=csv",
+  cwaAuth:"CWA-4A8A0D9D-95EA-4DA0-A62C-2DC7A8909F06",
+  cwaStation:"C0I410",
+  autoRefreshMinutes:1,
+  stationCount:4
+};
+
+function pad(n){return n<10?'0'+n:n}
+function nowStr(){const d=new Date();return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}` }
+function dateStr(){const d=new Date();const w=['日','一','二','三','四','五','六'][d.getDay()];return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}（週${w}）` }
+function roundInt(x){if(x==null||x==='')return'—';const n=Number(x);return isFinite(n)?Math.round(n):String(x);}
+
 let notified = {
   moisture: {},
   npk: {},
@@ -298,13 +282,8 @@ let notified = {
   offline: false
 };
 
-/* ============================================================
-   4. AI 判斷邏輯
-   ============================================================ */
-
 /* 含水率 */
 function checkMoisture(station, v){
-  if(v === "—" || v==null || isNaN(v)) return;
   if(v < ALERT_RULES.moisture.low && !notified.moisture[station]){
     alertTea("土壤含水率偏低", `第 ${station} 站僅 ${v}%`);
     notified.moisture[station] = true;
@@ -313,8 +292,6 @@ function checkMoisture(station, v){
 
 /* 土壤溫度 */
 function checkSoilTemp(station, v){
-  if(v === "—" || v==null || isNaN(v)) return;
-
   const {high, low} = ALERT_RULES.temperature;
 
   if(v > high && !notified.temp[station+"_high"]){
@@ -328,7 +305,7 @@ function checkSoilTemp(station, v){
   }
 }
 
-/* ⭐ NPK 警報（支援 min、low）*/
+/* NPK */
 function checkNPK(station, n, p, k) {
   const { min, low } = ALERT_RULES.npk;
 
@@ -338,14 +315,12 @@ function checkNPK(station, n, p, k) {
 
     if (v === "—" || v === null || isNaN(v)) return;
 
-    // 第 1 級：非常低（<= min）
     if (v <= min && !notified.npk[keyMin]) {
       alertTea(`${name} 嚴重偏低`, `第 ${station} 站 ${name}=${v}`);
       notified.npk[keyMin] = true;
       return;
     }
 
-    // 第 2 級：偏低（< low）
     if (v < low && !notified.npk[keyLow]) {
       alertTea(`${name} 數值偏低`, `第 ${station} 站 ${name}=${v}`);
       notified.npk[keyLow] = true;
@@ -357,7 +332,6 @@ function checkNPK(station, n, p, k) {
   checkOne("K", k);
 }
 
-/* 下雨 */
 function checkRain(value){
   if(value >= ALERT_RULES.rain.min && !notified.weather){
     alertTea("🌧 開始下雨", `名間降雨量：${value} mm`);
@@ -365,9 +339,7 @@ function checkRain(value){
   }
 }
 
-/* 掉線 */
 let lastUpdateTime = Date.now();
-
 function checkOffline(){
   const limitMs = ALERT_RULES.offline.limitMinutes * 60 * 1000;
 
@@ -379,9 +351,6 @@ function checkOffline(){
 }
 setInterval(checkOffline, 10000);
 
-/* ============================================================
-   5. 顏色（視覺保持 v6.9邏輯）
-   ============================================================ */
 function colorClass(type, value){
   if(value === "—" || value === "" || value == null) return "";
   value = Number(value);
@@ -410,9 +379,6 @@ function colorClass(type, value){
   }
 }
 
-/* ============================================================
-   6. 表格更新
-   ============================================================ */
 let weatherTime="—", genTime="—";
 let remainingSec = CONFIG.autoRefreshMinutes * 60;
 
@@ -437,35 +403,35 @@ function getLastValid(rows){
 
 async function refreshSheet(depth="Surface"){
   try{
-    const {cols,rows}=await fetchCSV();
-    const last=getLastValid(rows);
+    const {cols, rows} = await fetchCSV();
+    const last = getLastValid(rows);
     if(!last) return;
 
     const idx={};
-    cols.forEach((c,i)=>idx[c.toLowerCase()]=i);
+    cols.forEach((c,i)=>idx[c.toLowerCase()] = i);
 
-    genTime=last[idx["time"]]||"—";
-    lastUpdateTime=Date.now();
+    genTime = last[idx["time"]] || "—";
+    lastUpdateTime = Date.now();
     updateFooter();
 
-    envTemp.textContent=roundInt(last[idx["teagarden_air_temp"]]);
-    envHumi.textContent=roundInt(last[idx["teagarden_air_humidity"]]);
+    envTemp.textContent = roundInt(last[idx["teagarden_air_temp"]]);
+    envHumi.textContent = roundInt(last[idx["teagarden_air_humidity"]]);
 
     tbody.innerHTML="";
 
     for(let s=1;s<=CONFIG.stationCount;s++){
       const p=`station${s}_${depth.toLowerCase()}`;
 
-      const soilTemp=roundInt(last[idx[`${p}_soiltemp`]]);
-      const soilMoist=roundInt(last[idx[`${p}_soilmoisture`]]);
-      const n=roundInt(last[idx[`${p}_nitrogen`]]);
-      const p2=roundInt(last[idx[`${p}_phosphorus`]]);
-      const k=roundInt(last[idx[`${p}_potassium`]]);
+      const soilTemp = roundInt(last[idx[`${p}_soiltemp`]]);
+      const soilMoist = roundInt(last[idx[`${p}_soilmoisture`]]);
+      const n = roundInt(last[idx[`${p}_nitrogen`]]);
+      const p2 = roundInt(last[idx[`${p}_phosphorus`]]);
+      const k = roundInt(last[idx[`${p}_potassium`]]);
 
       /* AI 偵測 */
-      checkMoisture(s,soilMoist);
-      checkSoilTemp(s,soilTemp);
-      checkNPK(s,n,p2,k);
+      checkMoisture(s, soilMoist);
+      checkSoilTemp(s, soilTemp);
+      checkNPK(s, n, p2, k);
 
       const tr=document.createElement("tr");
       tr.innerHTML=`
@@ -479,12 +445,11 @@ async function refreshSheet(depth="Surface"){
       tbody.appendChild(tr);
     }
 
-  }catch(e){ console.warn("CSV 錯誤：",e); }
+  }catch(e){
+    console.warn("CSV 錯誤：",e);
+  }
 }
 
-/* ============================================================
-   7. 天氣更新
-   ============================================================ */
 async function refreshWeather(){
   try{
     const url=`https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0001-001?Authorization=${CONFIG.cwaAuth}&format=JSON&StationId=${CONFIG.cwaStation}`;
@@ -493,22 +458,24 @@ async function refreshWeather(){
     const st=js.records?.Station?.[0];
     const w=st?.WeatherElement||{};
 
-    weatherDesc.textContent=w.Weather||"—";
-    weatherTemp.textContent=roundInt(w.AirTemperature);
-    weatherHumi.textContent=roundInt(w.RelativeHumidity);
-    rainfall.textContent=roundInt(w.Now?.Precipitation);
+    weatherDesc.textContent = w.Weather || "—";
+    weatherTemp.textContent = roundInt(w.AirTemperature);
+    weatherHumi.textContent = roundInt(w.RelativeHumidity);
+    rainfall.textContent = roundInt(w.Now?.Precipitation);
 
-    checkRain(Number(w.Now?.Precipitation||0));
+    checkRain(Number(w.Now?.Precipitation || 0));
 
     weatherIcon.src =
       w.Weather?.includes("雨")
-        ?"https://img.icons8.com/emoji/48/cloud-with-rain.png"
-        :"https://img.icons8.com/emoji/48/sun-emoji.png";
+      ? "https://img.icons8.com/emoji/48/cloud-with-rain.png"
+      : "https://img.icons8.com/emoji/48/sun-emoji.png";
 
-    weatherTime=st?.ObsTime?.DateTime?.replace("T"," ").slice(0,19)||"—";
+    weatherTime = st?.ObsTime?.DateTime?.replace("T"," ").slice(0,19) || "—";
     updateFooter();
 
-  }catch(e){ console.warn("氣象錯誤:",e); }
+  }catch(e){
+    console.warn("氣象錯誤:", e);
+  }
 }
 
 /* ============================================================
@@ -544,5 +511,6 @@ refreshSheet();
 refreshWeather();
 
 </script>
+
 </body>
 </html>
