@@ -530,7 +530,17 @@ refreshWeather();
 
 });  // DOMContentLoaded END
 </script>
-  <!-- Dialogflow -->
+<!-- ===== Dialogflow Messenger 樣式 ===== -->
+<style>
+  df-messenger {
+    --df-messenger-bot-message: #245953;
+    --df-messenger-button-titlebar-color: #245953;
+    --df-messenger-chat-background-color: #E7F6E7;
+    --df-messenger-font-color: #000;
+  }
+</style>
+
+<!-- ===== Dialogflow Messenger 主程式 ===== -->
 <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
 <df-messenger
   intent="WELCOME"
@@ -538,5 +548,6 @@ refreshWeather();
   agent-id="8b30913c-be1a-4cd9-9309-136c81726d04"
   language-code="zh-tw"
 ></df-messenger>
+
 </body>
 </html>
