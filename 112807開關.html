@@ -530,6 +530,50 @@ refreshWeather();
 
 });  // DOMContentLoaded END
 </script>
+  <script>
+/* ============================================================
+   ⭐ 保證 df-messenger 一定會顯示（自動修復版）
+   ============================================================ */
+
+function ensureChatbotLoaded() {
+  const chatbot = document.querySelector("df-messenger");
+
+  // 元件存在但未被初始化（常見 Bug）
+  if (chatbot && !chatbot.shadowRoot) {
+    console.warn("df-messenger 未初始化 → 嘗試重建");
+
+    const attr = {
+      intent: chatbot.getAttribute("intent"),
+      "chat-title": chatbot.getAttribute("chat-title"),
+      "agent-id": chatbot.getAttribute("agent-id"),
+      "language-code": chatbot.getAttribute("language-code")
+    };
+
+    chatbot.remove();  // 先移除
+
+    // 重建
+    const newBot = document.createElement("df-messenger");
+    for (const k in attr) newBot.setAttribute(k, attr[k]);
+    document.body.appendChild(newBot);
+  }
+}
+
+// 聆聽官方事件 → 成功載入
+window.addEventListener("dfMessengerLoaded", () => {
+  console.log("df-messenger 成功載入!");
+});
+
+// 等待 1 秒，如果沒載入 → 強制修復一次
+setTimeout(ensureChatbotLoaded, 1200);
+
+// 網頁瞬間切換／重新整理後再補一次
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    setTimeout(ensureChatbotLoaded, 300);
+  }
+});
+</script>
+
 <!-- ===== Dialogflow Messenger 樣式 ===== -->
 <style>
   df-messenger {
