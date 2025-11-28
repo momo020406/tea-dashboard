@@ -261,7 +261,7 @@ document.getElementById("btnNotify").addEventListener("click", () => {
 
 
 const CONFIG = {
-  sheetCsvUrl:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTS7HeQa-EF65JqRoZufcn3U6msKU7NSr0QqPezgqcuCHousSsK8z_IBHkdGvLNU0XZTcreLfnBwL0M/pub?output=csv",
+  sheetCsvUrl:"https://docs..com/spreadsheets/d/e/2PACX-1vTS7HeQa-EF65JqRoZufcn3U6msKU7NSr0QqPezgqcuCHousSsK8z_IBHkdGvLNU0XZTcreLfnBwL0M/pub?output=csv",
   cwaAuth:"CWA-4A8A0D9D-95EA-4DA0-A62C-2DC7A8909F06",
   cwaStation:"C0I410",
   autoRefreshMinutes:1,
@@ -570,7 +570,7 @@ setInterval(()=>{
    🔔 LINE 群發推播功能（Web → GAS）
    ================================ */
 function sendLineNotify() {
-  fetch("https://script.google.com/macros/s/AKfycbydBypZcNm9Gb4uz_02ATyWhKw4dmvaYgExpjyz_1_nm9wNGd9H4DmWqIj-Qlth94qC/exec", {
+  fetch("https://script.google.com/macros/s/AKfycbyKfGJmOvtmoTtVDGxU_1wgjcyQ3VXCuffSIBmtyUBFdM4f2-939Sn7izfMQot-0Iwo/exec", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: `title=🔔 群發通知&message=這是來自智慧茶園儀表板的群發 LINE 測試通知！`
