@@ -181,7 +181,7 @@ const ALERT_RULES = {
 
   temperature: { high: 35, low: 10 },         // 土壤溫度過高 / 過低
 
-  npk: { min: 1, low: 20 },                   // NPK <1 → 異常；<20 → 偏低
+  npk: { min: 0 },   // 0 異常，其它都正常         // NPK <1 → 異常；<20 → 偏低 npk: { min: 1, low: 20 },
 
   rain: { min: 0.1 },                         // 降雨量 >0.1 mm → 開始下雨
 
