@@ -266,14 +266,28 @@ function checkSoilTemp(station, v){
   }
 }
 
-/* ⭐ NPK = 0 才通知 */
-function checkNPK(station, n, p, k){
-  const ab = ALERT_RULES.npk.abnormal;
+/* ⭐ NPK 警報（支援 min、low）*/
+function checkNPK(station, n, p, k) {
+  const { min, low } = ALERT_RULES.npk;
 
-  const checkOne = (name, v)=>{
-    if(v === ab && !notified.npk[`${station}_${name}_zero`]){
-      alertTea(`${name} 異常值`, `第 ${station} 站 ${name}=0（感測器可能異常）`);
-      notified.npk[`${station}_${name}_zero`] = true;
+  const checkOne = (name, v) => {
+    const keyMin = `${station}_${name}_min`;
+    const keyLow = `${station}_${name}_low`;
+
+    // 非數字不處理
+    if (v === "—" || v === null || isNaN(v)) return;
+
+    // ⭐ 第 1 級：非常低（<= min）
+    if (v <= min && !notified.npk[keyMin]) {
+      alertTea(`${name} 嚴重偏低`, `第 ${station} 站 ${name}=${v}`);
+      notified.npk[keyMin] = true;
+      return; // 已通知則不進入第二級
+    }
+
+    // ⭐ 第 2 級：偏低（< low）
+    if (v < low && !notified.npk[keyLow]) {
+      alertTea(`${name} 數值偏低`, `第 ${station} 站 ${name}=${v}`);
+      notified.npk[keyLow] = true;
     }
   };
 
@@ -281,6 +295,7 @@ function checkNPK(station, n, p, k){
   checkOne("P", p);
   checkOne("K", k);
 }
+
 
 /* 下雨 */
 function checkRain(value){
