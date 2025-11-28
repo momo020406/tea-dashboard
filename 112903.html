@@ -25,6 +25,7 @@ html,body{
 }
 .wrap{max-width:1280px;margin:auto;padding:18px;}
 
+/* 尋找此區塊 */
 header{display:grid;gap:var(--gap);
   grid-template-columns:1.2fr 1fr 1.2fr;align-items:stretch;}
 
@@ -41,7 +42,10 @@ header{display:grid;gap:var(--gap);
 .datebox{font-size:36px;font-weight:800;}
 
 /* ===== 天氣 + 溫濕度 ===== */
-.top-panels{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);margin-top:var(--gap);}
+/* 尋找此區塊 */
+.top-panels{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);margin-top:var(--gap);
+  align-items: stretch; /* 確保兩個 panel 等高 */
+}
 .panel{background:#fff;border:4px solid var(--panel);border-radius:var(--radius);padding:12px;}
 .panel h2{margin:0 0 8px 0;font-size:28px}
 
