@@ -176,8 +176,8 @@ const ALERT_RULES = {
   temperature: { high: 35, low: 10 }, // 溫度 >35、<10 通知
 
   // ⭐ NPK：只有 =0 才發 AI 通知（避免 LINE 群發額度用完）
-  npk: { abnormal: 0 },
-
+ // npk: { abnormal: 0 },
+npk: { min: 1, low: 20 },
   rain: { min: 0.1 },                // 下雨通知
 
   offline: { limitMinutes: 10 }       // 掉線 10 分鐘通知
