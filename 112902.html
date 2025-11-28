@@ -228,7 +228,7 @@ async function sendNotification(title, body) {
 function sendLineNotify(title,message){
   if(!NOTIFY_ENABLED) return;
 
-  fetch("https://script.google.com/macros/s/AKfycbyHvIZqDqpG4vXJSYxzx2F7KhmrVzLFWB3R1Fzx7VYG080RPTtaUdqJgupV4ZPPyM3_2g/exec",{
+  fetch("https://script.google.com/macros/s/AKfycby6kJ61k4OqXD6tcRFGOdazemtFYt8bqEXZhv0NU0qS-pIlXaoN1WkIQb9J6uFJUyTS/exec",{
     method:"POST",
     headers:{"Content-Type":"application/x-www-form-urlencoded"},
     body:`title=${encodeURIComponent(title)}&message=${encodeURIComponent(message)}`
