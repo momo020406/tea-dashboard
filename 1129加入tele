@@ -1,0 +1,257 @@
+<script>
+/* ================================ */
+/*           基本設定               */
+/* ================================ */
+
+/* ✈ Telegram 推播（唯一通知系統） */
+const TG_TOKEN = "8401721166:AAElCyyE-Ik-QZP3l1l2YNl1-_fdHp6HEq0";
+const TG_CHAT_ID = "7660987483";
+
+function sendTelegram(title, message) {
+  const text = `【${title}】\n${message}`;
+
+  return fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ chat_id: TG_CHAT_ID, text })
+  })
+  .then(r => r.json())
+  .then(r => console.log("[Telegram]", r))
+  .catch(err => console.error("[TG Error]", err));
+}
+
+/* 通知按鈕（只用 Telegram） */
+document.getElementById("btnNotify").addEventListener("click", () => {
+  sendTelegram("🔔 測試通知", "這是一則 Telegram 測試訊息！");
+});
+
+
+const CONFIG = {
+  sheetCsvUrl:"https://docs.google.com/spreadsheets/d/e/2PACX-1vTS7HeQa-EF65JqRoZufcn3U6msKU7NSr0QqPezgqcuCHousSsK8z_IBHkdGvLNU0XZTcreLfnBwL0M/pub?output=csv",
+  cwaAuth:"CWA-4A8A0D9D-95EA-4DA0-A62C-2DC7A8909F06",
+  cwaStation:"C0I410",
+  autoRefreshMinutes:1,
+  stationCount:4
+};
+
+
+function pad(n){return n<10?'0'+n:n}
+function nowStr(){const d=new Date();return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}` }
+function dateStr(){const d=new Date();const w=['日','一','二','三','四','五','六'][d.getDay()];return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}（週${w}）` }
+function roundInt(x){if(x==null||x==='')return'—';const n=Number(x);return isFinite(n)?Math.round(n):String(x);}
+
+
+/* ========== 顏色系統 ========== */
+function colorClass(type, value){
+  if(value === "—" || value === "" || value == null) return "";
+  value = Number(value);
+
+  switch(type){
+    case "temp":
+      if(value < 10) return "val-warn";
+      if(value < 28) return "val-ok";
+      if(value < 35) return "val-warn";
+      return "val-bad";
+
+    case "moist":
+      if(value < 20) return "val-bad";
+      if(value < 35) return "val-warn";
+      if(value < 70) return "val-ok";
+      return "val-warn";
+
+    case "n":
+    case "p":
+    case "k":
+      if(value === 0) return "val-bad";
+      if(value < 20) return "val-warn";
+      return "val-ok";
+
+    default: return "";
+  }
+}
+
+
+/* ================================ */
+/*            更新表格              */
+/* ================================ */
+let weatherTime="—", genTime="—";
+let remainingSec = CONFIG.autoRefreshMinutes*60;
+const footer=document.getElementById("footerInfo");
+
+function updateFooter(){
+  const m=Math.floor(remainingSec/60), s=pad(remainingSec%60);
+  footer.textContent = `氣象站更新時間：${weatherTime}　｜　感測器讀取時間：${genTime}　｜　🔄 下次更新倒數：${m}:${s}`;
+}
+
+async function fetchCSV(){
+  const res=await fetch(CONFIG.sheetCsvUrl+"&t="+Date.now(),{cache:'no-store'});
+  const text=await res.text();
+  const lines=text.trim().split(/\r?\n/).map(l=>l.split(',').map(v=>v.replace(/^"|"$/g,'').trim()));
+  const cols=lines[0].map(c=>c.replace(/^\uFEFF/,'').trim());
+  const rows=lines.slice(1);
+  return {cols,rows};
+}
+
+function getLastValid(rows){
+  for(let i=rows.length-1;i>=0;i--) if(rows[i].some(v=>v!=="")) return rows[i];
+  return null;
+}
+
+async function refreshSheet(depth="Surface"){
+  try{
+    const {cols, rows} = await fetchCSV();
+    const last = getLastValid(rows);
+    if(!last) return;
+
+    const timeIdx = cols.findIndex(c=>c.toLowerCase().includes("time"));
+    genTime = timeIdx>=0 ? last[timeIdx] : "—";
+    updateFooter();
+
+    const idx={}; cols.forEach((c,i)=>idx[c.toLowerCase()]=i);
+
+    document.getElementById("envTemp").textContent = roundInt(last[idx["teagarden_air_temp"]]);
+    document.getElementById("envHumi").textContent = roundInt(last[idx["teagarden_air_humidity"]]);
+
+    const tbody=document.getElementById("tbody");
+    tbody.innerHTML="";
+
+    for(let s=1;s<=CONFIG.stationCount;s++){
+      const p=`station${s}_${depth.toLowerCase()}`;
+
+      const soilTemp = roundInt(last[idx[`${p}_soiltemp`]]);
+      const soilMoist = roundInt(last[idx[`${p}_soilmoisture`]]);
+      const nitrogen = roundInt(last[idx[`${p}_nitrogen`]]);
+      const phosphorus = roundInt(last[idx[`${p}_phosphorus`]]);
+      const potassium = roundInt(last[idx[`${p}_potassium`]]);
+
+      // 通知判斷
+      checkMoisture(s, soilMoist);
+      checkNPK(s, nitrogen, phosphorus, potassium);
+      checkSoilTemp(s, soilTemp);
+
+      const tr=document.createElement("tr");
+      tr.innerHTML = `
+        <td>第${s}站</td>
+        <td class="${colorClass('temp', soilTemp)}">${soilTemp}</td>
+        <td class="${colorClass('moist', soilMoist)}">${soilMoist}</td>
+        <td class="${colorClass('n', nitrogen)}">${nitrogen}</td>
+        <td class="${colorClass('p', phosphorus)}">${phosphorus}</td>
+        <td class="${colorClass('k', potassium)}">${potassium}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+  }catch(e){ console.warn("CSV 錯誤：",e); }
+}
+
+
+/* ================================ */
+/*      瑞成智慧茶園 AI 通知       */
+/* ================================ */
+
+let notified = {
+  moisture: {},
+  npk: {},
+  temp: {},
+  weather: false,
+  offline: false
+};
+
+/* ⭐ 只用 Telegram 通知 */
+function alertTea(title, msg) {
+  sendTelegram(title, msg);
+  console.log("[Telegram 通知]", title, msg);
+}
+
+
+/* 1. 含水率 */
+function checkMoisture(station, value) {
+  if (value < 20 && !notified.moisture[station]) {
+    alertTea("土壤含水率偏低", `第 ${station} 站含水率僅 ${value}%`);
+    notified.moisture[station] = true;
+  }
+}
+
+/* 2. NPK */
+function checkNPK(station, n, p, k) {
+  if (n === 0 && !notified.npk[station+"_n"]) {
+    alertTea("N 氮值異常", `第 ${station} 站 N=0`);
+    notified.npk[station+"_n"] = true;
+  }
+  if (p === 0 && !notified.npk[station+"_p"]) {
+    alertTea("P 磷值異常", `第 ${station} 站 P=0`);
+    notified.npk[station+"_p"] = true;
+  }
+  if (k === 0 && !notified.npk[station+"_k"]) {
+    alertTea("K 鉀值異常", `第 ${station} 站 K=0`);
+    notified.npk[station+"_k"] = true;
+  }
+}
+
+/* 3. 土壤溫度 */
+function checkSoilTemp(station, value) {
+  if (value > 35 && !notified.temp[station]) {
+    alertTea("土壤溫度過高", `第 ${station} 站 ${value}°C`);
+    notified.temp[station] = true;
+  }
+  if (value < 10 && !notified.temp[station+"_low"]) {
+    alertTea("土壤過冷", `第 ${station} 站 ${value}°C`);
+    notified.temp[station+"_low"] = true;
+  }
+}
+
+
+/* ============= 天氣 API ============= */
+async function refreshWeather(){
+  try{
+    const url=`https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0001-001?Authorization=${CONFIG.cwaAuth}&format=JSON&StationId=${CONFIG.cwaStation}`;
+    const res=await fetch(url);
+    const js=await res.json();
+    const st=js.records?.Station?.[0];
+    const w=st?.WeatherElement||{};
+
+    document.getElementById("weatherDesc").textContent=w.Weather||"—";
+    document.getElementById("weatherTemp").textContent=roundInt(w.AirTemperature);
+    document.getElementById("weatherHumi").textContent=roundInt(w.RelativeHumidity);
+    document.getElementById("rainfall").textContent=roundInt(w.Now?.Precipitation);
+
+    weatherTime = (st?.ObsTime?.DateTime||"").replace("T"," ").slice(0,19) || "—";
+    updateFooter();
+
+  }catch(e){ console.warn("氣象錯誤:", e); }
+}
+
+
+/* ============= 按鈕/倒數/時鐘 ============= */
+document.querySelectorAll(".depth-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".depth-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    refreshSheet(btn.getAttribute("data-depth"));
+  });
+});
+
+document.getElementById("btnFullscreen").onclick=()=>document.documentElement.requestFullscreen?.();
+
+/* 時鐘 */
+(function clockTick(){
+  document.getElementById("mainClock").textContent=nowStr();
+  document.getElementById("dateBox").textContent=dateStr();
+  requestAnimationFrame(()=>setTimeout(clockTick,250));
+})();
+
+/* 倒數刷新 */
+setInterval(()=>{
+  remainingSec--;
+  if(remainingSec<=0){
+    location.replace(location.href.split("?")[0]+"?t="+Date.now());
+    return;
+  }
+  updateFooter();
+},1000);
+
+
+/* 初始化 */
+refreshSheet();
+refreshWeather();
+</script>
