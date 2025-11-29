@@ -1,3 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>瑞成智慧茶園 - 即時儀表板 v6.9</title>
+<style>
+    /*  https://script.google.com/macros/s/AKfycbydBypZcNm9Gb4uz_02ATyWhKw4dmvaYgExpjyz_1_nm9wNGd9H4DmWqIj-Qlth94qC/exec  正常回答 tea123 */
+    /*  https://script.google.com/macros/s/AKfycbxsX8kHFNPb7481PeQv2VukW8JYEYa-qNBUhysRDkczXvCwX9BxtE-hJe48QG53P1Hbyg/exec     正常回答   tea112603      */
+/* gas https://script.google.com/macros/s/AKfycbydBypZcNm9Gb4uz_02ATyWhKw4dmvaYgExpjyz_1_nm9wNGd9H4DmWqIj-Qlth94qC/exec 112801*/
+    :root{
+  --bg:#CDEDC7;
+  --panel:#245953;
+  --tile:#E7F6E7;
+  --text:#0B2D2A;
+  --num:#0f172a;
+  --ok:#16a34a;
+  --radius:18px;
+  --gap:14px;
+}
+html,body{
+  height:100%;margin:0;background:var(--bg);
+  font-family:"Microsoft JhengHei",system-ui,sans-serif;color:var(--text);
+}
+.wrap{max-width:1280px;margin:auto;padding:18px;}
+header{display:grid;gap:var(--gap);
+  grid-template-columns:1.2fr 1fr 1.2fr;align-items:stretch;}
+.title{background:#e8f7ee;border:4px solid var(--panel);
+  border-radius:var(--radius);display:flex;align-items:center;
+  justify-content:center;flex-direction:column;padding:12px;}
+.title h1{margin:6px 0 2px 0;font-size:44px;letter-spacing:4px;}
+.clock,.datebox{
+  background:#fff;border:4px solid var(--panel);
+  border-radius:var(--radius);display:flex;align-items:center;
+  justify-content:center;flex-direction:column;font-weight:700;}
+.clock{font-size:46px;}
+.datebox{font-size:36px;font-weight:800;}
+.source-note {
+  font-size: 50%; 
+  color: #444;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+/* 上方兩個面板 */
+.top-panels{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);margin-top:var(--gap);}
+.panel{background:#fff;border:4px solid var(--panel);border-radius:var(--radius);padding:12px;}
+.panel h2{margin:0 0 8px 0;font-size:28px}
+
+/* 天氣 */
+.weather-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;background:var(--tile);
+  border-radius:14px;padding:12px;align-items:start;justify-items:start;}
+.weather-cell{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700;line-height:1.4}
+.weather-cell img{width:36px;height:36px;}
+
+/* 環境感測 */
+.env-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:var(--tile);
+  border-radius:14px;padding:12px;align-items:center;justify-items:center;}
+.env-cell{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700;color:var(--num);}
+.env-cell img{width:50px;height:50px;}
+.env-cell .value{font-size:36px;font-weight:800}
+
+/* 表格 */
+.table-wrap{margin-top:var(--gap);background:#fff;border:4px solid var(--panel);
+  border-radius:var(--radius);padding:14px}
+.table-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:10px;}
+.table-title h3{margin:0;font-size:26px}
+
+/* 統一按鈕 */
+.btn{
+  background:var(--panel);
+  color:#fff;
+  border:none;
+  border-radius:999px;
+  padding:10px 0;
+  width:130px;
+  font-size:20px;
+  font-weight:800;
+  cursor:pointer;
+  letter-spacing:1px;
+  text-align:center;
+}
+.btn:active{transform:translateY(1px);}
+.depth-btn.active{background:var(--ok);}
+
+table{width:100%;border-collapse:separate;border-spacing:0 10px}
+thead th{font-size:18px;color:#334155;text-align:center}
+tbody td,thead th{padding:10px 8px}
+tbody tr{background:var(--tile);}
+tbody tr td{font-size:22px;text-align:center;font-weight:700;color:var(--num)}
+tbody tr td:first-child{font-weight:800;color:#1f2937}
+
+/* footer */
+.footer-line{color:#2563eb;font-size:15px;margin-top:10px;text-align:center;
+  border-top:2px solid #a3bfa3;padding-top:6px;}
+
+/* 手機 */
+@media (max-width:768px){
+  header{grid-template-columns:1fr !important;}
+  .title h1{font-size:32px}
+  .clock{font-size:32px}
+  .datebox{font-size:24px}
+  .top-panels{grid-template-columns:1fr;}
+  .env-grid{grid-template-columns:1fr;}
+  tbody tr td{font-size:18px}
+  .table-title {flex-direction:column;align-items:center;gap:12px;}
+  .depth-buttons {
+    display:grid;grid-template-columns:repeat(2,1fr);
+    gap:10px 14px;justify-items:center;
+  }
+  .btn{width:120px;font-size:18px;}
+}
+/* ===== 電腦版：全部靠左、同一行 ===== */
+.weather-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;     /* ← 讓兩者不要貼太近 */
+  font-size: 28px;
+}
+
+.wt-left {
+  font-weight: 700;
+}
+
+.wt-right {
+  font-size: 60%;
+  color: #444;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+
+/* 📱 手機版：來源移到第二行 + 靠右 */
+@media (max-width: 600px) {
+  .weather-title {
+    flex-wrap: wrap;            /* 允許換行 */
+  }
+
+  .wt-right {
+    width: 100%;                /* 讓它占一行 */
+    text-align: right;          /* 靠右 */
+    margin-top: 4px;
+  }
+}
+
+
+/* ===== 數據顏色系統 ===== */
+.val-ok { color:#0f9d58 !important; font-weight:900; }
+.val-warn { color:#f4b400 !important; font-weight:900; }
+.val-bad { color:#db4437 !important; font-weight:900; }
+.val-high { color:#c71585 !important; font-weight:900; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="datebox" id="dateBox">--</div>
+    <div class="title"><h1>瑞成智慧茶園</h1><small>Real-time Dashboard</small></div>
+    <div class="clock"><div id="mainClock">00:00:00</div></div>
+  </header>
+
+  <!-- ============================= -->
+  <!--          天氣面板            -->
+  <!-- ============================= -->
+  <div class="top-panels">
+    <section class="panel">
+<h2 class="weather-title">
+  <span class="wt-left">南投 名間鄉天氣狀況</span>
+  <span class="wt-right">(資料來源：氣象署)</span>
+</h2>
+      <div class="weather-grid">
+        <div class="weather-cell"><img id="weatherIcon" src=""><span>天氣：<span id="weatherDesc">—</span></span></div>
+        <div class="weather-cell"><img src="https://img.icons8.com/emoji/48/thermometer-emoji.png"><span>氣溫：<span id="weatherTemp">—</span> °C</span></div>
+        <div class="weather-cell"><img src="https://img.icons8.com/color/48/humidity.png"><span>濕度：<span id="weatherHumi">—</span> %</span></div>
+        <div class="weather-cell"><img src="https://img.icons8.com/emoji/48/umbrella-with-rain-drops.png"><span>降雨量：<span id="rainfall">—</span> mm</span></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>茶園溫溼度感測器</h2>
+      <div class="env-grid">
+        <div class="env-cell"><img src="https://img.icons8.com/emoji/48/thermometer-emoji.png"><div><span>溫度</span><br><span class="value" id="envTemp">—</span></div></div>
+        <div class="env-cell"><img src="https://img.icons8.com/color/48/humidity.png"><div><span>濕度</span><br><span class="value" id="envHumi">—</span></div></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============================= -->
+  <!--     土壤資料 + 顏色變化      -->
+  <!-- ============================= -->
+<!-- ============================= -->
+<!--     土壤資料 + 顏色變化      -->
+<!-- ============================= -->
+<section class="table-wrap">
+  <div class="table-title">
+    <h3>各站土壤數據</h3>
+
+    <div class="depth-buttons"> 
+      <button class="btn depth-btn active" data-depth="Surface">表面層</button>
+      <button class="btn depth-btn" data-depth="15cm">15 cm 層</button>
+      <button class="btn depth-btn" data-depth="25cm">25 cm 層</button>
+      <button class="btn" id="btnFullscreen">全螢幕</button>
+      <button class="btn" id="btnNotify">🔔 通知測試</button>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>項目</th><th>溫度 (°C)</th><th>含水率 (%)</th>
+        <th>氮 (N)</th><th>磷 (P)</th><th>鉀 (K)</th>
+      </tr>
+    </thead>
+
+    <tbody id="tbody"></tbody>
+  </table>
+
+  <div class="footer-line" id="footerInfo">
+    氣象站更新時間：—　｜　感測器讀取時間：—　｜　🔄 下次更新倒數：—
+  </div>
+</section>   <!-- ← 正確結尾 -->
+
+
 <script>
 /* ================================ */
 /*           基本設定               */
@@ -255,3 +478,20 @@ setInterval(()=>{
 refreshSheet();
 refreshWeather();
 </script>
+
+
+
+<!-- Dialogflow -->
+<script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+<df-messenger
+  intent="WELCOME"
+  chat-title="瑞成茶園智慧助手"
+  agent-id="8b30913c-be1a-4cd9-9309-136c81726d04"
+  language-code="zh-tw"
+></df-messenger>
+
+
+
+</body>
+
+</html>  
