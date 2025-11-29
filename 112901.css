@@ -1,0 +1,111 @@
+/* ===== 基本顏色 ===== */
+:root{
+  --bg:#CDEDC7;
+  --panel:#245953;
+  --tile:#E7F6E7;
+  --text:#0B2D2A;
+  --num:#0f172a;
+  --ok:#16a34a;
+  --radius:18px;
+  --gap:14px;
+}
+
+/* ===== 基礎 Layout ===== */
+html,body{
+  height:100%;margin:0;background:var(--bg);
+  font-family:"Microsoft JhengHei",system-ui,sans-serif;color:var(--text);
+}
+.wrap{max-width:1280px;margin:auto;padding:18px;}
+
+header{display:grid;gap:var(--gap);
+  grid-template-columns:1.2fr 1fr 1.2fr;align-items:stretch;}
+
+.title{background:#e8f7ee;border:4px solid var(--panel);
+  border-radius:var(--radius);display:flex;align-items:center;
+  justify-content:center;flex-direction:column;padding:12px;}
+.title h1{margin:6px 0 2px 0;font-size:44px;letter-spacing:4px;}
+
+.clock,.datebox{
+  background:#fff;border:4px solid var(--panel);
+  border-radius:var(--radius);display:flex;align-items:center;
+  justify-content:center;flex-direction:column;font-weight:700;}
+.clock{font-size:46px;}
+.datebox{font-size:36px;font-weight:800;}
+
+/* ===== 天氣 + 溫濕度 ===== */
+.top-panels{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap);margin-top:var(--gap);}
+.panel{background:#fff;border:4px solid var(--panel);border-radius:var(--radius);padding:12px;}
+.panel h2{margin:0 0 8px 0;font-size:28px}
+
+.weather-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;background:var(--tile);
+  border-radius:14px;padding:12px;}
+.weather-cell{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700;}
+.weather-cell img{width:36px;height:36px;}
+
+.env-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:var(--tile);
+  border-radius:14px;padding:12px;}
+.env-cell{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700;color:var(--num);}
+.env-cell img{width:50px;height:50px;}
+.env-cell .value{font-size:36px;font-weight:800}
+
+/* ===== 土壤數據表格 ===== */
+.table-wrap{margin-top:var(--gap);background:#fff;border:4px solid var(--panel);
+  border-radius:var(--radius);padding:14px}
+.table-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:10px;}
+.table-title h3{margin:0;font-size:26px}
+
+.btn{
+  background:var(--panel);
+  color:#fff;
+  border:none;
+  border-radius:999px;
+  padding:10px 0;
+  width:130px;
+  font-size:20px;
+  font-weight:800;
+  cursor:pointer;
+}
+.btn:active{transform:translateY(1px);}
+.depth-btn.active{background:var(--ok);}
+
+/* ===== 通知 ON/OFF ===== */
+#btnToggleNotify{
+  width:150px;
+  background:#777;
+}
+#btnToggleNotify.on{
+  background:#16a34a !important;
+}
+
+#notifyStatus{
+  font-size:17px;
+  font-weight:800;
+  color:#0b2d2a;
+  margin-left:8px;
+}
+
+/* ===== 表格 ===== */
+table{width:100%;border-collapse:separate;border-spacing:0 10px}
+thead th{font-size:18px;color:#334155;text-align:center}
+tbody td,thead th{padding:10px 8px}
+tbody tr{background:var(--tile);}
+tbody tr td{font-size:22px;text-align:center;font-weight:700;color:var(--num)}
+tbody tr td:first-child{font-weight:800;color:#1f2937}
+
+.footer-line{
+  color:#2563eb;font-size:15px;margin-top:10px;text-align:center;
+  border-top:2px solid #a3bfa3;padding-top:6px;
+}
+
+/* 數值顏色 */
+.val-ok { color:#0f9d58 !important; font-weight:900; }
+.val-warn { color:#f4b400 !important; font-weight:900; }
+.val-bad { color:#db4437 !important; font-weight:900; }
+
+/* ===== Dialogflow Messenger 樣式 ===== */
+df-messenger {
+  --df-messenger-bot-message: #245953;
+  --df-messenger-button-titlebar-color: #245953;
+  --df-messenger-chat-background-color: #E7F6E7;
+  --df-messenger-font-color: #000;
+}
