@@ -492,7 +492,7 @@ async function fetchCSV(){
 
 function getLastValid(rows){
   for(let i=rows.length-1;i>=0;i--)
-    if(rows[i].some(v=>v!=="")) return rows[i];
+    if(rows[i].some(v=>v!=='""')) return rows[i];
   return null;
 }
 
