@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>瑞成智慧茶園 Smart Tea Garden</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2e7d32;
+            --secondary-color: #4caf50;
+            --accent-color: #81c784;
+            --bg-color: #f0f4f8;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-muted: #666666;
+        }
+        
+        body { 
+            background-color: var(--bg-color); 
+            font-family: 'Noto Sans TC', sans-serif; 
+            color: var(--text-main);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(46, 125, 50, 0.2);
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+        }
+
+        .refresh-badge {
+            background-color: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        /* Weather Card */
+        .weather-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+            border-left: 6px solid #2196f3;
+            transition: transform 0.3s ease;
+        }
+        .weather-card:hover {
+            transform: translateY(-5px);
+        }
+        .weather-icon {
+            font-size: 3rem;
+            color: #2196f3;
+        }
+        .weather-stat {
+            text-align: center;
+            padding: 0.5rem;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+        }
+        .weather-stat .value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #1976d2;
+        }
+        .weather-stat .label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Station Cards */
+        .station-card {
+            background: var(--card-bg);
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+        .station-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+        .station-header {
+            background-color: #f1f8e9;
+            color: var(--primary-color);
+            padding: 1.2rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e8f5e9;
+        }
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .status-online { background-color: #4caf50; box-shadow: 0 0 5px #4caf50; }
+        .status-offline { background-color: #9e9e9e; }
+
+        .metrics-grid {
+            padding: 1.2rem;
+        }
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .metric-row:last-child { border-bottom: none; }
+        
+        .metric-name {
+            display: flex;
+            align-items: center;
+            color: #555;
+            font-size: 0.95rem;
+        }
+        .metric-name i {
+            width: 25px;
+            color: var(--secondary-color);
+        }
+        .metric-value {
+            font-weight: 700;
+            color: var(--text-main);
+            font-family: 'Segoe UI', monospace;
+        }
+        .unit {
+            font-size: 0.8em;
+            color: #888;
+            margin-left: 2px;
+        }
+
+        /* Loading */
+        .loading-container {
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-muted);
+        }
+
+        footer {
+            margin-top: 3rem;
+            padding: 2rem;
+            background-color: #fff;
+            color: var(--text-muted);
+            border-top: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header text-center">
+        <div class="container">
+            <h1 class="display-5 fw-bold mb-2"><i class="fas fa-leaf me-3"></i>瑞成智慧茶園</h1>
+            <p class="lead mb-3">Smart Tea Garden Monitoring System</p>
+            <div class="refresh-badge">
+                <i class="fas fa-clock me-2"></i>最後更新: <span id="last-update">載入中...</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <!-- Weather Widget -->
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="weather-card">
+                    <div class="row align-items-center">
+                        <div class="col-md-4 text-center text-md-start mb-3 mb-md-0">
+                            <h4 class="mb-1 fw-bold text-primary">
+                                <i class="fas fa-map-marker-alt me-2"></i><span id="location">南投 名間鄉</span>
+                            </h4>
+                            <div class="text-muted mb-2">氣象觀測站 (C0I410)</div>
+                            <div class="d-flex align-items-center justify-content-center justify-content-md-start">
+                                <span class="badge bg-info text-dark me-2" id="weather-desc">晴朗</span>
+                                <small class="text-muted" id="obs-time">--:--</small>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="row g-2">
+                                <div class="col-4">
+                                    <div class="weather-stat">
+                                        <i class="fas fa-temperature-high mb-1 text-danger"></i>
+                                        <div class="value"><span id="air-temp">--</span>°C</div>
+                                        <div class="label">氣溫</div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="weather-stat">
+                                        <i class="fas fa-tint mb-1 text-info"></i>
+                                        <div class="value"><span id="air-hum">--</span>%</div>
+                                        <div class="label">濕度</div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="weather-stat">
+                                        <i class="fas fa-cloud-rain mb-1 text-primary"></i>
+                                        <div class="value"><span id="precip">--</span>mm</div>
+                                        <div class="label">降雨量</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sensors Grid -->
+        <div class="row g-4" id="sensors-container">
+            <div class="col-12 loading-container">
+                <div class="spinner-border text-success mb-3" role="status"></div>
+                <h5>正在讀取茶園數據...</h5>
+                <p class="small">Reading data.json from GitHub...</p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center">
+        <div class="container">
+            <div class="mb-2">
+                <span class="me-3"><i class="fas fa-database me-1"></i>PostgreSQL</span>
+                <span class="me-3"><i class="fab fa-google-drive me-1"></i>Google Sheets</span>
+                <span><i class="fab fa-github me-1"></i>GitHub Pages</span>
+            </div>
+            <small>&copy; 2026 瑞成智慧茶園 | Powered by OpenClaw</small>
+        </div>
+    </footer>
+
+    <script>
+        // Configuration
+        const DATA_URL = 'data.json'; // Relative path to the JSON file
+
+        async function fetchData() {
+            try {
+                // Add timestamp to prevent caching
+                const response = await fetch(`${DATA_URL}?t=${new Date().getTime()}`);
+                if (!response.ok) throw new Error("Network response was not ok");
+                const data = await response.json();
+                renderDashboard(data);
+            } catch (error) {
+                console.error("Fetch error:", error);
+                document.getElementById('sensors-container').innerHTML = `
+                    <div class="col-12 text-center py-5 text-danger">
+                        <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                        <h4>無法讀取數據</h4>
+                        <p>請確認 Python Logger 是否正常運作並已上傳 data.json。</p>
+                        <button class="btn btn-outline-danger mt-2" onclick="location.reload()">重試</button>
+                    </div>`;
+            }
+        }
+
+        function renderDashboard(data) {
+            // Update Header & Weather
+            document.getElementById('last-update').innerText = data.last_update || "--";
+            
+            if (data.weather) {
+                document.getElementById('location').innerText = data.weather.location || "南投 名間鄉";
+                document.getElementById('air-temp').innerText = data.weather.air_temp || "--";
+                document.getElementById('air-hum').innerText = data.weather.humidity || "--";
+                document.getElementById('precip').innerText = data.weather.precip || "0";
+                document.getElementById('weather-desc').innerText = data.weather.weather || "未知";
+                
+                // Format observation time if available
+                if(data.weather.obs_time) {
+                    const date = new Date(data.weather.obs_time);
+                    if(!isNaN(date)) {
+                        document.getElementById('obs-time').innerText = 
+                            `${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')}`;
+                    } else {
+                        document.getElementById('obs-time').innerText = data.weather.obs_time;
+                    }
+                }
+            }
+
+            // Render Stations
+            const container = document.getElementById('sensors-container');
+            container.innerHTML = "";
+
+            for (let i = 1; i <= 4; i++) {
+                const sid = `Station${i}`;
+                const vals = data.sensors[sid];
+                const isOnline = !!vals;
+                
+                // Default values if offline
+                const v = vals || {
+                    soil_temp: '--', soil_moisture: '--', ec: '--', ph: '--', n: '--', p: '--', k: '--'
+                };
+
+                const statusClass = isOnline ? 'status-online' : 'status-offline';
+                const statusText = isOnline ? 'Online' : 'Offline';
+
+                const cardHtml = `
+                    <div class="col-md-6 col-lg-3">
+                        <div class="station-card">
+                            <div class="station-header">
+                                <div><i class="fas fa-broadcast-tower me-2"></i>Station ${i}</div>
+                                <div style="font-size:0.8rem; font-weight:normal; display:flex; align-items:center;">
+                                    <span class="status-indicator ${statusClass}"></span> ${statusText}
+                                </div>
+                            </div>
+                            <div class="metrics-grid">
+                                <div class="metric-row">
+                                    <div class="metric-name"><i class="fas fa-thermometer-half"></i> 溫度</div>
+                                    <div class="metric-value">${v.soil_temp}<span class="unit">°C</span></div>
+                                </div>
+                                <div class="metric-row">
+                                    <div class="metric-name"><i class="fas fa-water"></i> 濕度</div>
+                                    <div class="metric-value">${v.soil_moisture}<span class="unit">%</span></div>
+                                </div>
+                                <div class="metric-row">
+                                    <div class="metric-name"><i class="fas fa-bolt"></i> EC</div>
+                                    <div class="metric-value">${v.ec}<span class="unit">us/cm</span></div>
+                                </div>
+                                <div class="metric-row">
+                                    <div class="metric-name"><i class="fas fa-flask"></i> pH</div>
+                                    <div class="metric-value">${v.ph}<span class="unit"></span></div>
+                                </div>
+                                <div class="metric-row">
+                                    <div class="metric-name"><i class="fas fa-seedling"></i> 氮 (N)</div>
+                                    <div class="metric-value">${v.n}<span class="unit">mg/kg</span></div>
+                                </div>
+                                <div class="metric-row">
+                                    <div class="metric-name"><i class="fas fa-leaf"></i> 磷 (P)</div>
+                                    <div class="metric-value">${v.p}<span class="unit">mg/kg</span></div>
+                                </div>
+                                <div class="metric-row">
+                                    <div class="metric-name"><i class="fas fa-apple-alt"></i> 鉀 (K)</div>
+                                    <div class="metric-value">${v.k}<span class="unit">mg/kg</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += cardHtml;
+            }
+        }
+
+        // Init
+        fetchData();
+        // Auto refresh every 60s
+        setInterval(fetchData, 60000);
+    </script>
+</body>
+</html>
