@@ -1,5 +1,5 @@
 {
-  "last_update": "2026-03-07 18:09:34",
+  "last_update": "2026-03-07 18:10:44",
   "weather": {
     "air_temp": 19.6,
     "humidity": 64.0,
@@ -10,47 +10,47 @@
   },
   "sensors": {
     "Station3": {
-      "soil_temp": 21.5,
-      "soil_moisture": 15.4,
-      "ec": 55.0,
-      "ph": 4.5,
-      "n": 11.0,
-      "p": 15.0,
-      "k": 39.0,
-      "timestamp": "2026-03-07 18:09:34",
+      "soil_temp": 21.7,
+      "soil_moisture": 14.5,
+      "ec": 46.0,
+      "ph": 4.1,
+      "n": 10.0,
+      "p": 14.0,
+      "k": 38.0,
+      "timestamp": "2026-03-07 18:10:44",
       "station_id": 3
     },
     "Station4": {
       "soil_temp": 21.3,
-      "soil_moisture": 10.8,
-      "ec": 18.0,
+      "soil_moisture": 10.7,
+      "ec": 33.0,
       "ph": 4.4,
-      "n": 4.0,
-      "p": 6.0,
-      "k": 16.0,
-      "timestamp": "2026-03-07 18:09:34",
+      "n": 10.0,
+      "p": 14.0,
+      "k": 36.0,
+      "timestamp": "2026-03-07 18:10:44",
       "station_id": 4
     },
     "Station1": {
-      "soil_temp": 21.6,
-      "soil_moisture": 16.6,
-      "ec": 67.0,
-      "ph": 6.4,
+      "soil_temp": 21.5,
+      "soil_moisture": 17.1,
+      "ec": 78.0,
+      "ph": 6.5,
       "n": 11.0,
       "p": 15.0,
       "k": 39.0,
-      "timestamp": "2026-03-07 18:09:34",
+      "timestamp": "2026-03-07 18:10:44",
       "station_id": 1
     },
     "Station2": {
       "soil_temp": 21.5,
-      "soil_moisture": 16.0,
-      "ec": 47.0,
-      "ph": 5.7,
+      "soil_moisture": 16.2,
+      "ec": 46.0,
+      "ph": 5.8,
       "n": 10.0,
       "p": 14.0,
       "k": 38.0,
-      "timestamp": "2026-03-07 18:09:34",
+      "timestamp": "2026-03-07 18:10:44",
       "station_id": 2
     }
   }
