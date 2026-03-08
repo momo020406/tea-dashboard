@@ -1,23 +1,24 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Smart Tea Garden 即時儀表板</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Tea Garden · 經典儀表板</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { background: #f5f5f5; font-family: "Segoe UI", "Noto Sans TC", sans-serif; }
-        .hero { background: linear-gradient(135deg, #0f8a5f, #4caf50); color: #fff; padding: 2.5rem 0; border-bottom-left-radius: 35px; border-bottom-right-radius: 35px; box-shadow: 0 10px 30px rgba(0,0,0,.15); }
-        .hero h1 { font-weight: 700; }
-        .weather-card, .station-card { border-radius: 20px; background: #fff; box-shadow: 0 15px 30px rgba(0,0,0,.08); }
-        .metric-row { display: flex; justify-content: space-between; padding: .35rem 0; border-bottom: 1px solid #f1f1f1; font-size: .95rem; }
-        .metric-row:last-child { border-bottom: none; }
-        .metric-label { color: #64748b; display: flex; align-items: center; gap: .4rem; }
-        .metric-value { font-weight: 600; color: #0f172a; }
-        .badge-online { background: rgba(76,175,80,.1); color: #2e7d32; }
-        .badge-offline { background: rgba(158,158,158,.2); color: #6b7280; }
-        footer { color: #9ca3af; }
+        body { background:#f7f9fb; font-family:"Segoe UI","Noto Sans TC",sans-serif; }
+        .hero { background:linear-gradient(120deg,#2e7d32,#66bb6a); color:#fff; padding:2.5rem 0; }
+        .hero h1 { font-weight:700; }
+        .hero small { opacity:.8; }
+        .weather-card { border-radius:20px; background:#fff; box-shadow:0 20px 40px rgba(18,92,44,.1); padding:2rem; }
+        .station-card { border-radius:18px; background:#fff; box-shadow:0 12px 24px rgba(0,0,0,.05); padding:1.5rem; }
+        .metric-row { display:flex; justify-content:space-between; padding:.35rem 0; border-bottom:1px solid #eef1f4; }
+        .metric-row:last-child { border-bottom:none; }
+        .metric-label { color:#60738c; display:flex; align-items:center; gap:.5rem; }
+        .metric-value { font-weight:600; color:#0f172a; }
+        .badge-online { background:rgba(46,125,50,.15); color:#1b5e20; }
+        .badge-offline { background:#e2e8f0; color:#64748b; }
     </style>
 </head>
 <body>
@@ -25,163 +26,106 @@
         <div class="container">
             <h1><i class="fa-solid fa-leaf me-2"></i>Smart Tea Garden</h1>
             <p class="lead mb-0">RS485 → Logger → PostgreSQL → Google Sheets → GitHub Dashboard</p>
-            <small class="d-block mt-2" id="last-update">最後更新載入中…</small>
+            <small id="last-update">最後更新載入中…</small>
         </div>
     </section>
 
-    <main class="container my-5">
-        <div class="row g-4 mb-4" id="weather-summary">
-            <div class="col-12">
-                <div class="weather-card p-4 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
-                    <div>
-                        <h4 class="mb-1"><i class="fa-solid fa-location-dot me-2 text-warning"></i><span id="weather-location">南投 名間鄉</span></h4>
-                        <p class="text-white-50 mb-0">資料來源：CWA C0I410 自動測站</p>
-                    </div>
-                    <div class="text-end mt-4 mt-md-0">
-                        <div class="fs-2 fw-bold"><span id="weather-temp">--</span><span class="fs-5">°C</span></div>
-                        <div class="text-white-50">濕度 <span id="weather-hum">--</span>% ｜ 降雨量 <span id="weather-rain">--</span> mm ｜ <span id="weather-desc">--</span></div>
-                        <small class="text-white-50">觀測時間：<span id="weather-time">--</span></small>
-                    </div>
+    <main class="container py-5">
+        <div class="weather-card mb-4" id="weather-card">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h3 class="mb-1"><i class="fa-solid fa-location-dot text-warning me-2"></i><span id="weather-location">南投 名間鄉</span></h3>
+                    <p class="text-muted mb-0">資料來源：CWA C0I410 自動測站</p>
+                    <p class="text-muted mb-0">天氣狀況：<span id="weather-desc">--</span></p>
+                </div>
+                <div class="col-md-6 text-md-end mt-4 mt-md-0">
+                    <div class="display-4 fw-bold"><span id="weather-temp">--</span><span class="fs-5">°C</span></div>
+                    <div class="text-muted">濕度 <span id="weather-hum">--</span>% ｜ 降雨 <span id="weather-rain">--</span> mm</div>
+                    <small class="text-muted">觀測時間：<span id="weather-time">--</span></small>
                 </div>
             </div>
         </div>
 
-        <div class="row g-4" id="stations"></div>
+        <div class="row g-4" id="station-grid"></div>
     </main>
 
-    <footer class="text-center pb-4"><small>© 2026 Smart Tea Garden · 更新間隔 60 秒</small></footer>
+    <footer class="text-center pb-4 text-muted"><small>© 2026 Smart Tea Garden · 更新間隔 60 秒</small></footer>
 
     <script>
-        // === Dashboard configuration ===
-        // Set SMART_TEA_GARDEN_RT_SHEET_ID via GitHub Actions/Pages secrets or replace string literal below.
-        const SHEET_ID = window.SMART_TEA_GARDEN_RT_SHEET_ID || "REPLACE_WITH_REALTIME_SHEET_ID";
-        const SHEET_NAME = "Smart Tea Garden rt"; // must match worksheet title
-        const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
+        window.DASHBOARD_SHEET_ID = "REPLACE_WITH_REALTIME_SHEET_ID";
+    </script>
+    <script src="assets/dashboard-data.js"></script>
+    <script>
         const STATION_ORDER = [1, 2, 3, 4];
 
-        async function fetchSheet() {
-            if (!SHEET_ID || SHEET_ID.startsWith("REPLACE")) {
-                showError("尚未設定 Google Sheet ID。請在 dashboard.html 內更新 SHEET_ID。");
-                return;
-            }
-            try {
-                const resp = await fetch(`${GVIZ_URL}&t=${Date.now()}`);
-                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-                const text = await resp.text();
-                const json = gvizToJson(text);
-                render(json);
-            } catch (err) {
-                console.error(err);
-                showError("無法從 Google Sheets 取得 Smart Tea Garden rt 數據。");
-            }
-        }
-
-        function gvizToJson(text) {
-            const start = text.indexOf('{');
-            const end = text.lastIndexOf('}');
-            const payload = JSON.parse(text.substring(start, end + 1));
-            const cols = payload.table.cols.map(col => col.label);
-            const rows = payload.table.rows
-                .filter(row => row.c)
-                .map(row => {
-                    const obj = {};
-                    row.c.forEach((cell, idx) => {
-                        obj[cols[idx] || `col${idx}`] = cell ? cell.v : "";
-                    });
-                    return obj;
-                });
-            return rows;
-        }
-
-        function groupByStation(rows) {
-            const stations = {};
-            rows.forEach(row => {
-                const id = row["Station ID"];
-                if (!id) return;
-                stations[id] = row;
-            });
-            return stations;
-        }
-
-        function render(rows) {
+        function renderDashboard(rows) {
             if (!rows.length) {
-                showError("Smart Tea Garden rt 工作表目前沒有資料。");
+                showError("Smart Tea Garden rt 尚無資料。");
                 return;
             }
-
-            const stations = groupByStation(rows);
-            const latest = rows[rows.length - 1];
-
-            // Update header/weather
+            const latest = dashboardData.latest(rows);
+            const stations = dashboardData.groupByStation(rows);
             document.getElementById("last-update").textContent = latest["Timestamp"] || "--";
             document.getElementById("weather-location").textContent = latest["Location"] || "南投 名間鄉";
-            document.getElementById("weather-temp").textContent = formatNumber(latest["Air Temp"]);
-            document.getElementById("weather-hum").textContent = formatNumber(latest["Air Hum"]);
-            document.getElementById("weather-rain").textContent = formatNumber(latest["Rainfall"]);
             document.getElementById("weather-desc").textContent = latest["Weather"] || "--";
+            document.getElementById("weather-temp").textContent = dashboardData.formatNumber(latest["Air Temp"]);
+            document.getElementById("weather-hum").textContent = dashboardData.formatNumber(latest["Air Hum"]);
+            document.getElementById("weather-rain").textContent = dashboardData.formatNumber(latest["Rainfall"]);
             document.getElementById("weather-time").textContent = latest["Obs Time"] || "--";
 
-            const container = document.getElementById("stations");
-            container.innerHTML = "";
-
-            STATION_ORDER.forEach(number => {
-                const key = number.toString();
-                const station = stations[key];
-                const badge = station ? `<span class="badge badge-online">Online</span>` : `<span class="badge badge-offline">Offline</span>`;
-                const metrics = buildMetrics(station);
-                const html = `
-                    <div class="col-12 col-md-6 col-xl-3">
-                        <div class="station-card p-4">
+            const grid = document.getElementById("station-grid");
+            grid.innerHTML = "";
+            STATION_ORDER.forEach((id) => {
+                const row = stations[id];
+                const badge = row ? '<span class="badge badge-online">Online</span>' : '<span class="badge badge-offline">Offline</span>';
+                const metrics = buildMetricList(row);
+                grid.insertAdjacentHTML(
+                    "beforeend",
+                    `<div class="col-12 col-md-6 col-xl-3">
+                        <div class="station-card h-100">
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h5 class="mb-0"><i class="fa-solid fa-tower-observation text-success me-2"></i>Station ${number}</h5>
+                                <h5 class="mb-0"><i class="fa-solid fa-tower-observation text-success me-2"></i>Station ${id}</h5>
                                 ${badge}
                             </div>
                             ${metrics}
                         </div>
-                    </div>`;
-                container.insertAdjacentHTML("beforeend", html);
+                    </div>`
+                );
             });
         }
 
-        function buildMetrics(station) {
+        function buildMetricList(row) {
             const metrics = [
-                { label: "土壤溫度 (°C)", icon: "fa-temperature-half", value: station && station["Soil Temp"] },
-                { label: "土壤濕度 (%)", icon: "fa-droplet", value: station && station["Soil Moist"] },
-                { label: "導電度 EC", icon: "fa-bolt", value: station && station["EC"] },
-                { label: "酸鹼值 pH", icon: "fa-flask", value: station && station["PH"] },
-                { label: "氮 N (mg/kg)", icon: "fa-seedling", value: station && station["N"] },
-                { label: "磷 P (mg/kg)", icon: "fa-leaf", value: station && station["P"] },
-                { label: "鉀 K (mg/kg)", icon: "fa-apple-whole", value: station && station["K"] },
+                { label: "土壤溫度 (°C)", icon: "fa-temperature-half", value: row && row["Soil Temp"] },
+                { label: "土壤濕度 (%)", icon: "fa-droplet", value: row && row["Soil Moist"] },
+                { label: "導電度 EC", icon: "fa-bolt", value: row && row["EC"] },
+                { label: "酸鹼值 pH", icon: "fa-flask", value: row && row["PH"] },
+                { label: "氮 N", icon: "fa-seedling", value: row && row["N"] },
+                { label: "磷 P", icon: "fa-leaf", value: row && row["P"] },
+                { label: "鉀 K", icon: "fa-apple-whole", value: row && row["K"] },
             ];
-
-            return metrics.map(metric => `
+            return metrics
+                .map(
+                    (m) => `
                 <div class="metric-row">
-                    <span class="metric-label"><i class="fa-solid ${metric.icon}"></i>${metric.label}</span>
-                    <span class="metric-value">${formatNumber(metric.value)}</span>
-                </div>
-            `).join("");
+                    <span class="metric-label"><i class="fa-solid ${m.icon}"></i>${m.label}</span>
+                    <span class="metric-value">${dashboardData.formatNumber(m.value)}</span>
+                </div>`
+                )
+                .join("");
         }
 
-        function formatNumber(value) {
-            if (value === undefined || value === null || value === "") return "--";
-            const num = Number(value);
-            if (Number.isNaN(num)) return value;
-            return Number(num).toFixed(1);
-        }
-
-        function showError(message) {
-            document.getElementById("stations").innerHTML = `
+        function showError(msg) {
+            document.getElementById("station-grid").innerHTML = `
                 <div class="col-12">
-                    <div class="station-card p-5 text-center text-danger">
+                    <div class="station-card text-center text-danger py-5">
                         <i class="fa-solid fa-circle-exclamation fa-2x mb-3"></i>
-                        <p class="mb-0">${message}</p>
+                        <p class="mb-0">${msg}</p>
                     </div>
                 </div>`;
         }
 
-        // Initial load + polling
-        fetchSheet();
-        setInterval(fetchSheet, 60_000);
+        dashboardData.startPolling({ render: renderDashboard, onError: () => showError("無法連線到 Smart Tea Garden rt 工作表。") });
     </script>
 </body>
 </html>
