@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Tea Garden · 卡片版</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <style>
+        body { background:#fff; font-family:"Poppins","Noto Sans TC",sans-serif; }
+        .top-bar { padding:1.5rem 0; border-bottom:1px solid #f0f0f0; }
+        .top-bar h2 { margin:0; font-weight:700; }
+        .pill { display:inline-block; padding:.25rem .75rem; border-radius:999px; background:#eef2ff; color:#4338ca; font-size:.9rem; }
+        .data-wrap { padding:2rem 0; }
+        .summary-card { border-radius:24px; background:linear-gradient(135deg,#93c5fd,#60a5fa); color:#fff; padding:2rem; }
+        .summary-card h1 { font-weight:700; }
+        .stat-pill { background:rgba(255,255,255,.2); border-radius:999px; padding:.3rem 1rem; margin-right:.5rem; font-size:.9rem; }
+        .station-card { border:1px solid #f2f2f2; border-radius:20px; padding:1.5rem; transition:all .2s ease; }
+        .station-card:hover { transform:translateY(-4px); box-shadow:0 12px 25px rgba(0,0,0,.08); }
+        .metric-item { display:flex; justify-content:space-between; padding:.35rem 0; border-bottom:1px dashed #e5e7eb; font-size:.95rem; }
+        .metric-item:last-child { border-bottom:none; }
+        .badge-online { background:#ecfdf3; color:#15803d; font-size:.8rem; padding:.2rem .8rem; border-radius:999px; }
+        .badge-offline { background:#f1f5f9; color:#94a3b8; }
+    </style>
+</head>
+<body>
+    <header class="top-bar container d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+        <div>
+            <h2>Smart Tea Garden</h2>
+            <small class="text-muted">資料來源：Smart Tea Garden rt &amp; CWA C0I410</small>
+        </div>
+        <div class="mt-3 mt-md-0">
+            <span class="pill">最後更新 <span id="last-update">--</span></span>
+        </div>
+    </header>
+
+    <main class="container data-wrap">
+        <div class="summary-card mb-4">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 id="weather-temp">--°C</h1>
+                    <p class="lead mb-1">茶園濕度 <strong id="weather-hum">--%</strong></p>
+                    <p class="mb-0">降雨 <strong id="weather-rain">-- mm</strong> ｜ <span id="weather-desc">--</span></p>
+                </div>
+                <div class="col-lg-6 text-lg-end mt-4 mt-lg-0">
+                    <h4 id="weather-location">南投 名間鄉</h4>
+                    <div class="text-white-75">觀測時間：<span id="weather-time">--</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4" id="card-grid"></div>
+    </main>
+
+    <script>window.DASHBOARD_SHEET_ID = "REPLACE_WITH_REALTIME_SHEET_ID";</script>
+    <script src="assets/dashboard-data.js"></script>
+    <script>
+        const STATIONS = [1,2,3,4];
+
+        function renderCards(rows) {
+            if (!rows.length) return showError("工作表無資料");
+            const latest = dashboardData.latest(rows);
+            const stations = dashboardData.groupByStation(rows);
+            document.getElementById("last-update").textContent = latest["Timestamp"] || "--";
+            document.getElementById("weather-temp").textContent = `${dashboardData.formatNumber(latest["Air Temp"]) }°C`;
+            document.getElementById("weather-hum").textContent = `${dashboardData.formatNumber(latest["Air Hum"]) }%`;
+            document.getElementById("weather-rain").textContent = `${dashboardData.formatNumber(latest["Rainfall"]) }`;
+            document.getElementById("weather-desc").textContent = latest["Weather"] || "--";
+            document.getElementById("weather-location").textContent = latest["Location"] || "南投 名間鄉";
+            document.getElementById("weather-time").textContent = latest["Obs Time"] || "--";
+
+            const grid = document.getElementById("card-grid");
+            grid.innerHTML = "";
+            STATIONS.forEach((id) => {
+                const row = stations[id];
+                const badge = row ? '<span class="badge-online">ONLINE</span>' : '<span class="badge-offline">OFFLINE</span>';
+                grid.insertAdjacentHTML(
+                    "beforeend",
+                    `<div class="col-12 col-md-6 col-xl-3">
+                        <div class="station-card h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">Station ${id}</h5>
+                                ${badge}
+                            </div>
+                            ${metrics(row)}
+                        </div>
+                    </div>`
+                );
+            });
+        }
+
+        function metrics(row) {
+            const list = [
+                ["溫度", row && row["Soil Temp"], "°C"],
+                ["濕度", row && row["Soil Moist"], "%"],
+                ["EC", row && row["EC"], "us/cm"],
+                ["pH", row && row["PH"], ""],
+                ["氮", row && row["N"], "mg/kg"],
+                ["磷", row && row["P"], "mg/kg"],
+                ["鉀", row && row["K"], "mg/kg"],
+            ];
+            return list
+                .map(
+                    ([label, value, unit]) => `
+                    <div class="metric-item">
+                        <span>${label}</span>
+                        <strong>${dashboardData.formatNumber(value)} ${unit}</strong>
+                    </div>`
+                )
+                .join("");
+        }
+
+        function showError(msg) {
+            document.getElementById("card-grid").innerHTML = `<div class="col-12 text-center text-danger">${msg}</div>`;
+        }
+
+        dashboardData.startPolling({ render: renderCards, onError: () => showError("無法取得 Google Sheets 資料") });
+    </script>
+</body>
+</html>
