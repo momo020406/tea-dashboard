@@ -31,7 +31,7 @@
     </section>
 
     <main class="container py-5">
-        <div class="weather-card mb-4" id="weather-card">
+        <div class="weather-card mb-4">
             <div class="row align-items-center">
                 <div class="col-md-6">
                     <h3 class="mb-1"><i class="fa-solid fa-location-dot text-warning me-2"></i><span id="weather-location">南投 名間鄉</span></h3>
@@ -51,34 +51,30 @@
 
     <footer class="text-center pb-4 text-muted"><small>© 2026 Smart Tea Garden · 更新間隔 60 秒</small></footer>
 
-    <script>
-        window.DASHBOARD_SHEET_ID = "REPLACE_WITH_REALTIME_SHEET_ID";
-    </script>
     <script src="assets/dashboard-data.js"></script>
     <script>
         const STATION_ORDER = [1, 2, 3, 4];
 
-        function renderDashboard(rows) {
-            if (!rows.length) {
-                showError("Smart Tea Garden rt 尚無資料。");
+        function renderDashboard(data) {
+            if (!data || !data.sensors) {
+                showError("data.json 尚未生成或沒有任何感測資料。");
                 return;
             }
-            const latest = dashboardData.latest(rows);
-            const stations = dashboardData.groupByStation(rows);
-            document.getElementById("last-update").textContent = latest["Timestamp"] || "--";
-            document.getElementById("weather-location").textContent = latest["Location"] || "南投 名間鄉";
-            document.getElementById("weather-desc").textContent = latest["Weather"] || "--";
-            document.getElementById("weather-temp").textContent = dashboardData.formatNumber(latest["Air Temp"]);
-            document.getElementById("weather-hum").textContent = dashboardData.formatNumber(latest["Air Hum"]);
-            document.getElementById("weather-rain").textContent = dashboardData.formatNumber(latest["Rainfall"]);
-            document.getElementById("weather-time").textContent = latest["Obs Time"] || "--";
+
+            const weather = data.weather || {};
+            document.getElementById("last-update").textContent = data.last_update || "--";
+            document.getElementById("weather-location").textContent = weather.location || "南投 名間鄉";
+            document.getElementById("weather-desc").textContent = weather.weather || "--";
+            document.getElementById("weather-temp").textContent = dashboardData.formatNumber(weather.air_temp);
+            document.getElementById("weather-hum").textContent = dashboardData.formatNumber(weather.humidity);
+            document.getElementById("weather-rain").textContent = dashboardData.formatNumber(weather.rainfall);
+            document.getElementById("weather-time").textContent = weather.obs_time || "--";
 
             const grid = document.getElementById("station-grid");
             grid.innerHTML = "";
             STATION_ORDER.forEach((id) => {
-                const row = stations[id];
-                const badge = row ? '<span class="badge badge-online">Online</span>' : '<span class="badge badge-offline">Offline</span>';
-                const metrics = buildMetricList(row);
+                const reading = dashboardData.station(data, id);
+                const badge = reading ? '<span class="badge badge-online">Online</span>' : '<span class="badge badge-offline">Offline</span>';
                 grid.insertAdjacentHTML(
                     "beforeend",
                     `<div class="col-12 col-md-6 col-xl-3">
@@ -87,22 +83,22 @@
                                 <h5 class="mb-0"><i class="fa-solid fa-tower-observation text-success me-2"></i>Station ${id}</h5>
                                 ${badge}
                             </div>
-                            ${metrics}
+                            ${buildMetricList(reading)}
                         </div>
                     </div>`
                 );
             });
         }
 
-        function buildMetricList(row) {
+        function buildMetricList(reading) {
             const metrics = [
-                { label: "土壤溫度 (°C)", icon: "fa-temperature-half", value: row && row["Soil Temp"] },
-                { label: "土壤濕度 (%)", icon: "fa-droplet", value: row && row["Soil Moist"] },
-                { label: "導電度 EC", icon: "fa-bolt", value: row && row["EC"] },
-                { label: "酸鹼值 pH", icon: "fa-flask", value: row && row["PH"] },
-                { label: "氮 N", icon: "fa-seedling", value: row && row["N"] },
-                { label: "磷 P", icon: "fa-leaf", value: row && row["P"] },
-                { label: "鉀 K", icon: "fa-apple-whole", value: row && row["K"] },
+                { label: "土壤溫度 (°C)", icon: "fa-temperature-half", value: reading && reading.soil_temp },
+                { label: "土壤濕度 (%)", icon: "fa-droplet", value: reading && reading.soil_moisture },
+                { label: "導電度 EC", icon: "fa-bolt", value: reading && reading.ec },
+                { label: "酸鹼值 pH", icon: "fa-flask", value: reading && reading.ph },
+                { label: "氮 N", icon: "fa-seedling", value: reading && reading.n },
+                { label: "磷 P", icon: "fa-leaf", value: reading && reading.p },
+                { label: "鉀 K", icon: "fa-apple-whole", value: reading && reading.k },
             ];
             return metrics
                 .map(
@@ -123,9 +119,10 @@
                         <p class="mb-0">${msg}</p>
                     </div>
                 </div>`;
+            document.getElementById("last-update").textContent = "--";
         }
 
-        dashboardData.startPolling({ render: renderDashboard, onError: () => showError("無法連線到 Smart Tea Garden rt 工作表。") });
+        dashboardData.startPolling({ render: renderDashboard, onError: () => showError("無法下載 data.json。") });
     </script>
 </body>
 </html>
