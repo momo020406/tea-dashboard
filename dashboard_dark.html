@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Tea Garden · 暗色主題</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background:#0b1120; color:#e5e7eb; font-family:"Segoe UI","Noto Sans TC",sans-serif; }
+        .hero { padding:2rem 0; text-align:center; }
+        .hero h1 { font-weight:700; color:#a7f3d0; }
+        .hero p { color:#94a3b8; }
+        .panel { background:#111827; border-radius:20px; padding:2rem; box-shadow:0 20px 40px rgba(0,0,0,.45); margin-bottom:2rem; }
+        .weather-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1.2rem; }
+        .stat { background:#1f2937; border-radius:16px; padding:1rem; text-align:center; }
+        .stat h3 { font-weight:600; margin-bottom:.4rem; }
+        .station { background:#1a2332; border-radius:18px; padding:1.5rem; margin-bottom:1.5rem; }
+        .station h5 { color:#facc15; display:flex; justify-content:space-between; align-items:center; }
+        .metric-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:.75rem; margin-top:1rem; }
+        .metric { background:#111827; border-radius:12px; padding:.75rem 1rem; }
+        .metric-label { color:#94a3b8; font-size:.9rem; }
+        .metric-value { font-size:1.2rem; font-weight:600; color:#e5e7eb; }
+        .badge-online { color:#34d399; }
+        .badge-offline { color:#6b7280; }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <div class="container">
+            <h1><i class="fa-solid fa-sparkles me-2"></i>Smart Tea Garden</h1>
+            <p>暗色玻璃設計 · GitHub Pages 即時儀表板</p>
+            <small id="last-update" class="text-secondary">最後更新載入中…</small>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="panel" id="weather-panel">
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-4">
+                    <h2 id="weather-location">南投 名間鄉</h2>
+                    <p class="text-secondary mb-2">天氣狀況：<span id="weather-desc">--</span></p>
+                    <small class="text-secondary">觀測時間：<span id="weather-time">--</span></small>
+                </div>
+                <div class="col-lg-8">
+                    <div class="weather-grid">
+                        <div class="stat">
+                            <h3>茶園溫度</h3>
+                            <div class="display-5" id="weather-temp">--</div>
+                            <small>°C</small>
+                        </div>
+                        <div class="stat">
+                            <h3>茶園濕度</h3>
+                            <div class="display-6" id="weather-hum">--</div>
+                            <small>%</small>
+                        </div>
+                        <div class="stat">
+                            <h3>降雨量</h3>
+                            <div class="display-6" id="weather-rain">--</div>
+                            <small>mm</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="station-container"></div>
+    </div>
+
+    <script>
+        window.DASHBOARD_SHEET_ID = "REPLACE_WITH_REALTIME_SHEET_ID";
+    </script>
+    <script src="assets/dashboard-data.js"></script>
+    <script>
+        const ORDER = [1, 2, 3, 4];
+
+        function renderDark(rows) {
+            if (!rows.length) return showError("Realtime sheet empty");
+            const latest = dashboardData.latest(rows);
+            const stations = dashboardData.groupByStation(rows);
+            document.getElementById("last-update").textContent = latest["Timestamp"] || "--";
+            document.getElementById("weather-location").textContent = latest["Location"] || "南投 名間鄉";
+            document.getElementById("weather-desc").textContent = latest["Weather"] || "--";
+            document.getElementById("weather-temp").textContent = dashboardData.formatNumber(latest["Air Temp"]);
+            document.getElementById("weather-hum").textContent = dashboardData.formatNumber(latest["Air Hum"]);
+            document.getElementById("weather-rain").textContent = dashboardData.formatNumber(latest["Rainfall"]);
+            document.getElementById("weather-time").textContent = latest["Obs Time"] || "--";
+
+            const wrap = document.getElementById("station-container");
+            wrap.innerHTML = "";
+            ORDER.forEach((id) => {
+                const station = stations[id];
+                const badge = station ? '<span class="badge-online">ONLINE</span>' : '<span class="badge-offline">OFFLINE</span>';
+                wrap.insertAdjacentHTML(
+                    "beforeend",
+                    `<div class="station">
+                        <h5>Station ${id} ${badge}</h5>
+                        <div class="metric-grid">
+                            ${metricCell("土壤溫度", station && station["Soil Temp"], "°C")}
+                            ${metricCell("土壤濕度", station && station["Soil Moist"], "%")}
+                            ${metricCell("導電度 EC", station && station["EC"], "us/cm")}
+                            ${metricCell("酸鹼值 pH", station && station["PH"], "")}
+                            ${metricCell("氮 Nitrogen", station && station["N"], "mg/kg")}
+                            ${metricCell("磷 Phosphorus", station && station["P"], "mg/kg")}
+                            ${metricCell("鉀 Potassium", station && station["K"], "mg/kg")}
+                        </div>
+                    </div>`
+                );
+            });
+        }
+
+        function metricCell(label, value, unit) {
+            return `<div class="metric">
+                <div class="metric-label">${label}</div>
+                <div class="metric-value">${dashboardData.formatNumber(value)} ${unit}</div>
+            </div>`;
+        }
+
+        function showError(msg) {
+            document.getElementById("station-container").innerHTML = `<div class="panel text-center text-danger">${msg}</div>`;
+        }
+
+        dashboardData.startPolling({ render: renderDark, onError: () => showError("無法取得 Smart Tea Garden rt 工作表。") });
+    </script>
+</body>
+</html>
