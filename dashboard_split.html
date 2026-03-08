@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Tea Garden · Split Panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <style>
+        body { background:#edf2f7; font-family:"Inter","Noto Sans TC",sans-serif; }
+        .wrap { max-width:1200px; margin:0 auto; padding:2rem 1rem 3rem; }
+        .panels { display:grid; grid-template-columns:350px auto; gap:1.5rem; }
+        @media (max-width: 992px){ .panels { grid-template-columns:1fr; } }
+        .weather-panel { background:#1d4ed8; color:#fff; border-radius:24px; padding:2rem; }
+        .weather-panel h2 { font-weight:700; }
+        .stat { margin-top:1rem; padding:1rem; border-radius:16px; background:rgba(255,255,255,.15); }
+        .stat span { display:block; font-size:.9rem; opacity:.8; }
+        .stations-panel { background:#fff; border-radius:24px; padding:2rem; box-shadow:0 20px 40px rgba(15,23,42,.08); }
+        .stations-panel h3 { margin-bottom:1.5rem; }
+        .station-row { border:1px solid #e5e7eb; border-radius:16px; padding:1rem 1.25rem; margin-bottom:1rem; }
+        .station-row:last-child { margin-bottom:0; }
+        .station-header { display:flex; justify-content:space-between; align-items:center; font-weight:600; }
+        .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:.75rem; margin-top:.75rem; }
+        .grid div { background:#f8fafc; border-radius:12px; padding:.5rem; text-align:center; }
+        .grid span { display:block; font-size:.85rem; color:#64748b; }
+        .grid strong { font-size:1.1rem; }
+        .badge-online { background:#dcfce7; color:#166534; padding:.2rem .6rem; border-radius:999px; font-size:.75rem; }
+        .badge-offline { background:#e2e8f0; color:#475569; }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="panels">
+            <aside class="weather-panel">
+                <h2>天氣資訊</h2>
+                <p class="mb-1" id="weather-location">南投 名間鄉</p>
+                <p class="mb-4">狀態：<span id="weather-desc">--</span></p>
+                <div class="stat">
+                    <span>茶園溫度</span>
+                    <h1 id="weather-temp">--°C</h1>
+                </div>
+                <div class="stat">
+                    <span>茶園濕度</span>
+                    <h2 id="weather-hum">--%</h2>
+                </div>
+                <div class="stat">
+                    <span>降雨量</span>
+                    <h2 id="weather-rain">-- mm</h2>
+                </div>
+                <small class="d-block mt-4">觀測時間：<span id="weather-time">--</span></small>
+                <small>最後更新：<span id="last-update">--</span></small>
+            </aside>
+            <section class="stations-panel">
+                <h3>四站即時感測</h3>
+                <div id="station-list"></div>
+            </section>
+        </div>
+    </div>
+
+    <script>window.DASHBOARD_SHEET_ID = "REPLACE_WITH_REALTIME_SHEET_ID";</script>
+    <script src="assets/dashboard-data.js"></script>
+    <script>
+        const ORDER = [1,2,3,4];
+
+        function renderSplit(rows) {
+            if (!rows.length) return showError("工作表尚未產生資料");
+            const latest = dashboardData.latest(rows);
+            const stations = dashboardData.groupByStation(rows);
+            document.getElementById("last-update").textContent = latest["Timestamp"] || "--";
+            document.getElementById("weather-location").textContent = latest["Location"] || "南投 名間鄉";
+            document.getElementById("weather-desc").textContent = latest["Weather"] || "--";
+            document.getElementById("weather-temp").textContent = `${dashboardData.formatNumber(latest["Air Temp"]) }°C`;
+            document.getElementById("weather-hum").textContent = `${dashboardData.formatNumber(latest["Air Hum"]) }%`;
+            document.getElementById("weather-rain").textContent = `${dashboardData.formatNumber(latest["Rainfall"]) } mm`;
+            document.getElementById("weather-time").textContent = latest["Obs Time"] || "--";
+
+            const list = document.getElementById("station-list");
+            list.innerHTML = "";
+            ORDER.forEach((id) => {
+                const row = stations[id];
+                const badge = row ? '<span class="badge-online">ONLINE</span>' : '<span class="badge-offline">OFFLINE</span>';
+                list.insertAdjacentHTML(
+                    "beforeend",
+                    `<div class="station-row">
+                        <div class="station-header">Station ${id} ${badge}</div>
+                        <div class="grid">
+                            ${cell("溫度", row && row["Soil Temp"], "°C")}
+                            ${cell("濕度", row && row["Soil Moist"], "%")}
+                            ${cell("EC", row && row["EC"], "us/cm")}
+                            ${cell("pH", row && row["PH"], "")}
+                            ${cell("氮", row && row["N"], "mg/kg")}
+                            ${cell("磷", row && row["P"], "mg/kg")}
+                            ${cell("鉀", row && row["K"], "mg/kg")}
+                        </div>
+                    </div>`
+                );
+            });
+        }
+
+        function cell(label, value, unit) {
+            return `<div><span>${label}</span><strong>${dashboardData.formatNumber(value)} ${unit}</strong></div>`;
+        }
+
+        function showError(msg) {
+            document.getElementById("station-list").innerHTML = `<div class="alert alert-danger">${msg}</div>`;
+        }
+
+        dashboardData.startPolling({ render: renderSplit, onError: () => showError("無法讀取 Google Sheets") });
+    </script>
+</body>
+</html>
