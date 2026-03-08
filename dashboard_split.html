@@ -56,40 +56,38 @@
         </div>
     </div>
 
-    <script>window.DASHBOARD_SHEET_ID = "REPLACE_WITH_REALTIME_SHEET_ID";</script>
     <script src="assets/dashboard-data.js"></script>
     <script>
         const ORDER = [1,2,3,4];
 
-        function renderSplit(rows) {
-            if (!rows.length) return showError("工作表尚未產生資料");
-            const latest = dashboardData.latest(rows);
-            const stations = dashboardData.groupByStation(rows);
-            document.getElementById("last-update").textContent = latest["Timestamp"] || "--";
-            document.getElementById("weather-location").textContent = latest["Location"] || "南投 名間鄉";
-            document.getElementById("weather-desc").textContent = latest["Weather"] || "--";
-            document.getElementById("weather-temp").textContent = `${dashboardData.formatNumber(latest["Air Temp"]) }°C`;
-            document.getElementById("weather-hum").textContent = `${dashboardData.formatNumber(latest["Air Hum"]) }%`;
-            document.getElementById("weather-rain").textContent = `${dashboardData.formatNumber(latest["Rainfall"]) } mm`;
-            document.getElementById("weather-time").textContent = latest["Obs Time"] || "--";
+        function renderSplit(data) {
+            if (!data || !data.sensors) return showError("data.json 尚未準備好");
+            const weather = data.weather || {};
+            document.getElementById("last-update").textContent = data.last_update || "--";
+            document.getElementById("weather-location").textContent = weather.location || "南投 名間鄉";
+            document.getElementById("weather-desc").textContent = weather.weather || "--";
+            document.getElementById("weather-temp").textContent = `${dashboardData.formatNumber(weather.air_temp)}°C`;
+            document.getElementById("weather-hum").textContent = `${dashboardData.formatNumber(weather.humidity)}%`;
+            document.getElementById("weather-rain").textContent = `${dashboardData.formatNumber(weather.rainfall)} mm`;
+            document.getElementById("weather-time").textContent = weather.obs_time || "--";
 
             const list = document.getElementById("station-list");
             list.innerHTML = "";
             ORDER.forEach((id) => {
-                const row = stations[id];
+                const row = dashboardData.station(data, id);
                 const badge = row ? '<span class="badge-online">ONLINE</span>' : '<span class="badge-offline">OFFLINE</span>';
                 list.insertAdjacentHTML(
                     "beforeend",
                     `<div class="station-row">
                         <div class="station-header">Station ${id} ${badge}</div>
                         <div class="grid">
-                            ${cell("溫度", row && row["Soil Temp"], "°C")}
-                            ${cell("濕度", row && row["Soil Moist"], "%")}
-                            ${cell("EC", row && row["EC"], "us/cm")}
-                            ${cell("pH", row && row["PH"], "")}
-                            ${cell("氮", row && row["N"], "mg/kg")}
-                            ${cell("磷", row && row["P"], "mg/kg")}
-                            ${cell("鉀", row && row["K"], "mg/kg")}
+                            ${cell("溫度", row && row.soil_temp, "°C")}
+                            ${cell("濕度", row && row.soil_moisture, "%")}
+                            ${cell("EC", row && row.ec, "us/cm")}
+                            ${cell("pH", row && row.ph, "")}
+                            ${cell("氮", row && row.n, "mg/kg")}
+                            ${cell("磷", row && row.p, "mg/kg")}
+                            ${cell("鉀", row && row.k, "mg/kg")}
                         </div>
                     </div>`
                 );
@@ -102,9 +100,10 @@
 
         function showError(msg) {
             document.getElementById("station-list").innerHTML = `<div class="alert alert-danger">${msg}</div>`;
+            document.getElementById("last-update").textContent = "--";
         }
 
-        dashboardData.startPolling({ render: renderSplit, onError: () => showError("無法讀取 Google Sheets") });
+        dashboardData.startPolling({ render: renderSplit, onError: () => showError("無法下載 data.json") });
     </script>
 </body>
 </html>
