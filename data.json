@@ -1,5 +1,5 @@
 {
-  "last_update": "2026-03-08 18:15:39",
+  "last_update": "2026-03-08 18:16:50",
   "weather": {
     "location": "名間",
     "weather": "晴",
@@ -17,40 +17,40 @@
       "n": 12.0,
       "p": 16.0,
       "k": 41.0,
-      "timestamp": "2026-03-08 18:15:39",
+      "timestamp": "2026-03-08 18:16:50",
       "station_id": 3
     },
     "Station4": {
-      "soil_temp": 21.2,
+      "soil_temp": 21.1,
       "soil_moisture": 24.2,
-      "ec": 133.0,
+      "ec": 215.0,
       "ph": 4.0,
-      "n": 12.0,
-      "p": 16.0,
-      "k": 41.0,
-      "timestamp": "2026-03-08 18:15:39",
+      "n": 13.0,
+      "p": 18.0,
+      "k": 45.0,
+      "timestamp": "2026-03-08 18:16:50",
       "station_id": 4
     },
     "Station1": {
       "soil_temp": 21.9,
-      "soil_moisture": 26.7,
-      "ec": 147.0,
+      "soil_moisture": 26.4,
+      "ec": 146.0,
       "ph": 5.1,
       "n": 12.0,
       "p": 16.0,
       "k": 42.0,
-      "timestamp": "2026-03-08 18:15:39",
+      "timestamp": "2026-03-08 18:16:50",
       "station_id": 1
     },
     "Station2": {
       "soil_temp": 21.8,
       "soil_moisture": 26.1,
-      "ec": 126.0,
+      "ec": 113.0,
       "ph": 4.0,
       "n": 12.0,
       "p": 16.0,
       "k": 41.0,
-      "timestamp": "2026-03-08 18:15:39",
+      "timestamp": "2026-03-08 18:16:50",
       "station_id": 2
     }
   }
