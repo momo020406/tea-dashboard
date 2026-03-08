@@ -22,7 +22,7 @@
         <header class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
             <div>
                 <h1>Smart Tea Garden</h1>
-                <p class="text-muted">Minimal Google Sheets driven dashboard</p>
+                <p class="text-muted">Minimal data.json driven dashboard</p>
             </div>
             <div class="mt-2 mt-md-0">
                 <span class="badge bg-primary" id="last-update">--</span>
@@ -42,7 +42,7 @@
                 </div>
                 <div class="col-md-4">
                     <small>觀測時間：<span id="weather-time">--</span></small><br>
-                    <small>資料來源：Smart Tea Garden rt</small>
+                    <small>資料來源：Smart Tea Garden data.json</small>
                 </div>
             </div>
         </section>
@@ -67,30 +67,28 @@
         </div>
     </div>
 
-    <script>window.DASHBOARD_SHEET_ID = "REPLACE_WITH_REALTIME_SHEET_ID";</script>
     <script src="assets/dashboard-data.js"></script>
     <script>
         const ORDER = [1,2,3,4];
 
-        function renderTable(rows) {
-            if (!rows.length) return showError("無資料");
-            const latest = dashboardData.latest(rows);
-            const stations = dashboardData.groupByStation(rows);
-            document.getElementById("last-update").textContent = latest["Timestamp"] || "--";
-            document.getElementById("weather-temp").textContent = `${dashboardData.formatNumber(latest["Air Temp"],1)}°C`;
-            document.getElementById("weather-hum").textContent = `${dashboardData.formatNumber(latest["Air Hum"],1)}%`;
-            document.getElementById("weather-rain").textContent = `${dashboardData.formatNumber(latest["Rainfall"],1)} mm`;
-            document.getElementById("weather-location").textContent = latest["Location"] || "南投 名間鄉";
-            document.getElementById("weather-desc").textContent = latest["Weather"] || "--";
-            document.getElementById("weather-time").textContent = latest["Obs Time"] || "--";
+        function renderTable(data) {
+            if (!data || !data.sensors) return showError("尚無 data.json 資料");
+            const weather = data.weather || {};
+            document.getElementById("last-update").textContent = data.last_update || "--";
+            document.getElementById("weather-temp").textContent = `${dashboardData.formatNumber(weather.air_temp,1)}°C`;
+            document.getElementById("weather-hum").textContent = `${dashboardData.formatNumber(weather.humidity,1)}%`;
+            document.getElementById("weather-rain").textContent = `${dashboardData.formatNumber(weather.rainfall,1)} mm`;
+            document.getElementById("weather-location").textContent = weather.location || "南投 名間鄉";
+            document.getElementById("weather-desc").textContent = weather.weather || "--";
+            document.getElementById("weather-time").textContent = weather.obs_time || "--";
 
             const tbody = document.getElementById("table-body");
             tbody.innerHTML = "";
             ORDER.forEach((id) => {
-                const row = stations[id];
+                const row = dashboardData.station(data, id);
                 const cells = row
-                    ? ["Soil Temp","Soil Moist","EC","PH","N","P","K"].map((key) => `<td>${dashboardData.formatNumber(row[key])}</td>`)
-                    : ["","","","","","",""].map(() => "<td>--</td>");
+                    ? ["soil_temp","soil_moisture","ec","ph","n","p","k"].map((key) => `<td>${dashboardData.formatNumber(row[key])}</td>`)
+                    : Array(7).fill("<td>--</td>");
                 const status = row ? '<span class="badge bg-success">Online</span>' : '<span class="badge bg-secondary">Offline</span>';
                 tbody.insertAdjacentHTML(
                     "beforeend",
@@ -105,9 +103,10 @@
 
         function showError(msg) {
             document.getElementById("table-body").innerHTML = `<tr><td colspan="9" class="text-danger text-center">${msg}</td></tr>`;
+            document.getElementById("last-update").textContent = "--";
         }
 
-        dashboardData.startPolling({ render: renderTable, onError: () => showError("無法連線到 Google Sheets") });
+        dashboardData.startPolling({ render: renderTable, onError: () => showError("無法下載 data.json") });
     </script>
 </body>
 </html>
