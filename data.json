@@ -1,56 +1,56 @@
 {
-  "last_update": "2026-03-09 09:10:53",
+  "last_update": "2026-03-11 18:11:09",
   "weather": {
-    "air_temp": 19.3,
-    "humidity": 80.0,
+    "air_temp": 20.6,
+    "humidity": 62.0,
     "weather": "晴",
     "precip": 0.0,
-    "obs_time": "2026-03-09T09:00:00+08:00",
+    "obs_time": "2026-03-11T18:00:00+08:00",
     "location": "名間"
   },
   "sensors": {
     "Station3": {
-      "soil_temp": 21.9,
-      "soil_moisture": 25.7,
-      "ec": 115.0,
-      "ph": 5.3,
-      "n": 12.0,
-      "p": 16.0,
-      "k": 41.0,
-      "timestamp": "2026-03-09 09:10:53",
-      "station_id": 3
-    },
-    "Station4": {
-      "soil_temp": 21.3,
-      "soil_moisture": 22.6,
-      "ec": 162.0,
-      "ph": 4.0,
-      "n": 13.0,
-      "p": 17.0,
-      "k": 43.0,
-      "timestamp": "2026-03-09 09:10:53",
-      "station_id": 4
-    },
-    "Station1": {
-      "soil_temp": 22.0,
-      "soil_moisture": 25.9,
-      "ec": 108.0,
+      "soil_temp": 21.0,
+      "soil_moisture": 22.2,
+      "ec": 151.0,
       "ph": 5.4,
       "n": 12.0,
       "p": 16.0,
-      "k": 40.0,
-      "timestamp": "2026-03-09 09:10:53",
-      "station_id": 1
+      "k": 42.0,
+      "timestamp": "2026-03-11 18:11:09",
+      "station_id": 3
     },
-    "Station2": {
-      "soil_temp": 22.0,
-      "soil_moisture": 25.2,
-      "ec": 144.0,
-      "ph": 4.0,
+    "Station4": {
+      "soil_temp": 20.4,
+      "soil_moisture": 18.3,
+      "ec": 135.0,
+      "ph": 4.5,
       "n": 12.0,
       "p": 16.0,
       "k": 42.0,
-      "timestamp": "2026-03-09 09:10:53",
+      "timestamp": "2026-03-11 18:11:09",
+      "station_id": 4
+    },
+    "Station1": {
+      "soil_temp": 21.0,
+      "soil_moisture": 22.8,
+      "ec": 135.0,
+      "ph": 5.8,
+      "n": 12.0,
+      "p": 16.0,
+      "k": 42.0,
+      "timestamp": "2026-03-11 18:11:09",
+      "station_id": 1
+    },
+    "Station2": {
+      "soil_temp": 20.9,
+      "soil_moisture": 21.7,
+      "ec": 129.0,
+      "ph": 6.1,
+      "n": 12.0,
+      "p": 16.0,
+      "k": 41.0,
+      "timestamp": "2026-03-11 18:11:09",
       "station_id": 2
     }
   }
